@@ -9,19 +9,19 @@ class UserPlan extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
-        'start_date',
-        'end_date',
+        'upgraded_at',
     ];
-
-    protected $dates = ['start_date', 'end_date'];
-
+    protected $dates = [];
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(
+            User::class,
+        );
     }
-
     public function plan()
     {
-        return $this->belongsTo(Plan::class);
+        return $this->belongsTo(
+            Plan::class,
+        );
     }
 }

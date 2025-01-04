@@ -14,6 +14,7 @@ class Plan extends Model
     protected $fillable = [
         'name',
         'amount',
+        'transfer_commission',
         'user_amount_per_referal',
         'refered_amount',
         'amount_after_count',
@@ -24,11 +25,9 @@ class Plan extends Model
         'daily_transfer_count',
         'monthly_transfer_count',
         'max_transfer_count',
-        "selling_price",
-        "buying_price",
     ];
 
-    public function users()
+    public function userPlans()
     {
         return $this->hasMany(UserPlan::class);
     }

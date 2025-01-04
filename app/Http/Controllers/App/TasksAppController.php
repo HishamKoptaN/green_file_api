@@ -5,16 +5,9 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\DB;
 use App\Models\Task;
-use App\Models\User;
-use App\Models\UserTask;
+use App\Models\TaskProof;
 
 class TasksAppController extends Controller
 {
@@ -35,123 +28,114 @@ class TasksAppController extends Controller
                     );
                 }
             case 'POST':
-                return $this->SubmitTask(
+                return $this->proofTask(
                     $request,
                     $id,
                 );
-            case 'PUT':
-                return $this->updateFile(
-                    $request,
-                );
-            case 'DELETE':
-                return $this->deleteFile(
-                    $request,
-                );
             default:
-                return response()->json(['status' => false, 'message' => 'Invalid request method'], 405);
+                return $this->failureResponse();
         }
     }
 
     public function getTasks(): JsonResponse
     {
-        $tasks = Task::where([
-            'status' => 'active',
-        ])->get();
-        return response()->json(
-            [
-                'status' => true,
-                'tasks' => $tasks
-            ],
-        );
+        try {
+            $tasks = Task::where(
+                [
+                    'status' => true,
+                ],
+            )->get();
+            return successResponse(
+                $tasks,
+            );
+        } catch (\Exception $e) {
+            return $this->failureResponse(
+                'Failed to fetch tasks: ' . $e->getMessage(),
+            );
+        }
     }
 
     public function getTaskDetails(
         Request $request,
         $id,
     ) {
-        $task = Task::where([
-            'id' => $id,
-            'status' => 'active',
-        ])->first();
-        if (!$task) {
-            return response()->json(
+        try {
+            $task = Task::where(
                 [
-                    'status' => false,
-                    'message' => __('Task not found!!')
+                    'id' => $id,
+                    'status' => true,
+                ],
+            )->first();
+            $user = Auth::guard('sanctum')->user();
+            return successResponse(
+                [
+                    'task' => $task,
+                    'completed' => TaskProof::where(
+                        [
+                            'user_id' => $user->id,
+                            'task_id' => $task->id,
+                        ],
+                    )->count() > 0
                 ],
             );
-        }
-        $user = Auth::guard('sanctum')->user();
-        if (!$user) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => __('User not authenticated')
-                ],
+        } catch (\Exception $e) {
+            return failureResponse(
+                'Failed to fetch tasks: ' . $e->getMessage(),
             );
         }
-        return response()->json(
-            [
-                'status' => true,
-                'task' => $task,
-                'completed' => UserTask::where(['user_id' => $user->id, 'task_id' => $task->id])->count() > 0
-            ],
-        );
     }
 
-    protected function SubmitTask(Request $request, $id)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => __('User not authenticated')
-            ]);
-        }
-        $task = Task::withCount([
-            'users' => fn($builder) => $builder->where('user_id', $user->id)
-        ])
-            ->where([
-                'id' => $id,
-                'status' => 'active',
-            ])->first();
-        if (!$task) {
-            return response()->json([
-                'status' => false,
-                'message' => __('Task not found')
-            ]);
-        }
-        if ($task->users_count != 0) {
-            return response()->json([
-                'status' => false,
-                'error' => __('You already have completed this task')
-            ]);
-        }
-        $image = $request->image;
-        if ($image instanceof \Illuminate\Http\UploadedFile) {
-            $name = time() . '_' . $image->getClientOriginalName();
-            $destinationPath = public_path('images/user_tasks/');
-            if (!File::exists($destinationPath)) {
-                File::makeDirectory($destinationPath, 0755, true);
+    protected function proofTask(
+        Request $request,
+    ) {
+        try {
+            return failureResponse();
+            $user = Auth::guard('sanctum')->user();
+            $task = Task::withCount(
+                [
+                    'users' => fn(
+                        $builder,
+                    ) => $builder->where(
+                        'user_id',
+                        $user->id,
+                    )
+                ],
+            )
+                ->where(
+                    [
+                        'id' => $request->id,
+                        'status' => true,
+                    ],
+                )->first();
+            if ($task->users_count != 0) {
+                return failureResponse(
+                    __('You already have completed this task'),
+                );
             }
-            $image->move($destinationPath, $name);
-            UserTask::create([
-                'status' => "pending",
-                'image' => "https://aquan.aquan.website/api/show/image/user_tasks/$name",
-                'amount' => $task->amount,
-                'task_id' => $task->id,
-                'user_id' => $user->id
-            ]);
-            return response()->json([
-                'status' => true,
-                'message' => __('Proof has been sent'),
-                'completed' => true,
-                'task' => $task
-            ]);
+            $image = uploadImage(
+                $request->file(
+                    'image',
+                ),
+                'task_proofs',
+            );
+            TaskProof::create(
+                [
+                    'status' => "pending",
+                    'image' => $image,
+                    'task_id' => $task->id,
+                    'user_id' => $user->id
+                ],
+            );
+            return successResponse(
+                [
+                    'completed' => true,
+                    'task' => $task
+                ],
+            );
+        } catch (\Exception $e) {
+            return failureResponse(
+                'Failed to fetch tasks: ' . $e->getMessage(),
+            );
         }
-        return response()->json([
-            'status' => false,
-            'message' => __('Error try again later.')
-        ]);
     }
 }

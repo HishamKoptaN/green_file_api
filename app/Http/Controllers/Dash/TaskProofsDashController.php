@@ -30,16 +30,25 @@ class TaskProofsDashController extends Controller
     public function getTaskProofs()
     {
         try {
-            $userTasks = TaskProof::with([
-                'user:id,name',
-            ])->orderBy('created_at', 'desc')->get();
-            $userTasks->each(
-                function ($userTask) {
-                    $userTask->user->makeHidden(['id']);
+            $taskProofs = TaskProof::with(
+                [
+                    'user:id,first_name',
+                ],
+            )->orderBy(
+                'created_at',
+                'desc',
+            )->get();
+            $taskProofs->each(
+                function ($taskProof) {
+                    $taskProof->user->makeHidden(
+                        [
+                            'id',
+                        ],
+                    );
                 },
             );
             return successResponse(
-                $userTasks,
+                $taskProofs,
             );
         } catch (\Exception $e) {
             return failureResponse(
@@ -56,14 +65,20 @@ class TaskProofsDashController extends Controller
             ],
         );
         try {
-            $task = TaskProof::where('id', $request->id)
-                ->with([
-                    'user:id,name',
-                ])->first();
-
+            $task = TaskProof::where(
+                'id',
+                $request->id,
+            )
+                ->with(
+                    [
+                        'user:id,first_name',
+                    ],
+                )->first();
             $task->status = $request->status;
             $task->save();
-            if ($request->status === 'accepted') {
+            if (
+                $request->status === 'accepted'
+            ) {
                 $user = User::find($task->user_id);
                 if ($user) {
                     $user->balance += $task->amount;

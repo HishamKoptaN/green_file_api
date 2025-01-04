@@ -6,77 +6,135 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Traits\ApiResponseTrait;
 use App\Models\Transfer;
+use App\Models\Balance;
+use Illuminate\Support\Facades\DB;
 
 class TransferAppController extends Controller
 {
-    use ApiResponseTrait;
-
-    public function handleRequest(Request $request, $account_number = null)
-    {
+    public function handleRequest(
+        Request $request,
+        $account_number = null,
+    ) {
         switch ($request->method()) {
             case 'GET':
-                return $this->get($account_number);
+                return $this->get(
+                    $account_number,
+                );
             case 'POST':
-                return $this->transferMoney($request, $account_number);
+                return $this->transferMoney(
+                    $request,
+                    $account_number,
+                );
             default:
-                return $this->failureResponse('Invalid request method', 405);
+                return failureResponse(
+                    'Invalid request method',
+                    405,
+                );
         }
     }
-
-    protected function get($account_number)
-    {
-        $user = $this->findUserByAccount($account_number);
+    protected function get(
+        $account_number,
+    ) {
+        $user = $this->findUserByAccount(
+            $account_number,
+        );
         if (!$user) {
-            return $this->failureResponse(__('User not found'), 404);
+            return failureResponse(
+                'User not found',
+                404,
+            );
         }
-
-        return $this->successResponse([
-            'name' => $user->name,
-        ]);
+        return successResponse(
+            [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+            ],
+        );
+    }
+    public function transferMoney(
+        Request $request,
+    ) {
+        $sender_user = Auth::guard('sanctum')->user();
+        $recived_user = User::where(
+            'account_number',
+            $request->account_number,
+        )->first();
+        if (!$recived_user) {
+            return failureResponse(
+                'Recipient account not found',
+                404,
+            );
+        }
+        // رصيد المستخدم الراسل
+        $sender_user_balance = Balance::where(
+            'user_id',
+            $sender_user->id,
+        )->first();
+        if (
+            !$sender_user_balance || $sender_user_balance->available_balance < $request->amount
+        ) {
+            return failureResponse(
+                'You don\'t have enough balance',
+                400,
+            );
+        }
+        $recived_user_balance = Balance::firstOrCreate(
+            [
+                'user_id' => $recived_user->id,
+            ],
+        );
+        // بدء معاملة قاعدة البيانات لضمان سلامة العملية
+        DB::beginTransaction();
+        try {
+            // خصم المبلغ من رصيد الراسل
+            $sender_user_balance->available_balance -= $request->amount;
+            $sender_user_balance->save();
+            // إضافة المبلغ إلى رصيد المستلم
+            $recived_user_balance->available_balance += $request->amount;
+            $recived_user_balance->save();
+            DB::commit();
+            return successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return failureResponse(
+                'Transfer failed. Please try again.' . $e->getMessage(),
+            );
+        }
     }
 
-    public function transferMoney(Request $request)
-    {
-        $validated = $request->validate([
-            'account_number' => 'required|string', // تحقق من أن account_number موجود
-            'amount' => 'required|numeric|min:1', // تحقق من أن المبلغ صالح
-        ]);
-        $me = Auth::guard('sanctum')->user(); // المستخدم الحالي
-        $user = User::where('account_number', $validated['account_number'])->first(); // البحث عن المستخدم الآخر
-        // التحقق من وجود المستخدم
-        if (!$user) {
-            return $this->failureResponse(__('User not found'), 404);
-        }
-        // التحقق من الرصيد
-        if ($validated['amount'] > $me->balance) {
-            return $this->failureResponse(__('You don\'t have enough balance'), 400);
-        }
-        // إجراء التحويل
-        $me->decrement('balance', $validated['amount']); // خصم من رصيد المستخدم الحالي
-        $user->increment('balance', $validated['amount']); // إضافة لرصيد المستخدم المستقبل
-        return $this->successResponse([
-            'message' => __('Transfer successful'),
-        ]);
-    }
 
-
-    public function index(Request $request)
-    {
-        $transactions = Transfer::with(['receiver', 'senderCurrency', 'receiverCurrency'])
-            ->where('user_id', $request->user()->id)
+    public function index(
+        Request $request,
+    ) {
+        $transactions = Transfer::with(
+            [
+                'receiver',
+                'senderCurrency',
+                'receiverCurrency',
+            ],
+        )
+            ->where(
+                'user_id',
+                $request->user()->id,
+            )
             ->latest()
             ->get();
 
-        return $this->successResponse([
-            'transactions' => $transactions,
-            'user' => $request->user(),
-        ]);
+        return successResponse(
+            [
+                'transactions' => $transactions,
+                'user' => $request->user(),
+            ]
+        );
     }
 
-    private function findUserByAccount($account_number)
-    {
-        return User::where('account_number', $account_number)->first();
+    private function findUserByAccount(
+        $account_number,
+    ) {
+        return User::where(
+            'account_number',
+            $account_number,
+        )->first();
     }
 }

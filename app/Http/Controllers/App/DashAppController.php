@@ -9,6 +9,7 @@ use App\Traits\ApiResponseTrait;
 use App\Models\Currency;
 use App\Models\Rate;
 use App\Models\Plan;
+use App\Models\UserPlan;
 
 class DashAppController extends Controller
 {
@@ -44,37 +45,56 @@ class DashAppController extends Controller
     public function get()
     {
         try {
-            $user = Auth::guard('sanctum')->user();
-            $plan = Plan::where('id', $user->plan_id)->first();
-            $exchange_rates = Currency::where('id', '!=', 2)->get();
-            $commission = $plan->transfer_commission;
-            $selling_rates = Rate::where([['plan_id', $user->plan_id], ['to', 2]])->get()
-                ->map(function ($selling_price) {
+            $user = Auth::guard(
+                'sanctum',
+            )->user();
+            $userPlan = $user->userPlan->plan;
+            $exchange_rates = Currency::where(
+                'id',
+                '!=',
+                2,
+            )->get();
+            $selling_rates = Rate::where(
+                'plan_id',
+                $userPlan->id,
+            )->where(
+                'to',
+                2,
+            )->get()->map(
+                function (
+                    $selling_price,
+                ) {
                     return [
                         'price' => $selling_price->price,
                         'updated_at' => $selling_price->updated_at,
                         'from' => $selling_price->fromCurrency->id,
                     ];
-                });
-            $buying_rates = Rate::where([['plan_id', $user->plan_id], ['from', 2]])->get()
-                ->map(function ($buying_price) {
+                },
+            );
+            $buying_rates = Rate::where(
+                'plan_id',
+                $userPlan->id,
+            )->where(
+                'from',
+                2,
+            )->get()->map(
+                function ($buying_price) {
                     return [
                         'price' => $buying_price->price,
                         'updated_at' => $buying_price->updated_at,
                         'to' => $buying_price->toCurrency->id,
                     ];
-                });
+                },
+            );
             $currencies = Currency::all();
-            $rates = Rate::where('plan_id', $user->plan_id)->get();
             return $this->successResponse(
                 [
                     'exchange_rates' => $exchange_rates,
                     'selling_prices' => $selling_rates,
                     'buying_prices' => $buying_rates,
                     'currencies' => $currencies,
-                    'rates' => $rates,
-                    'commission' => $commission,
-                    // 'plan' => $plan,
+                    'rates' =>  Rate::where('plan_id', $userPlan->id)->get(),
+                    'commission' => $userPlan->transfer_commission,
                 ],
             );
         } catch (\Exception $e) {

@@ -33,14 +33,18 @@ class WithdrawsDashController extends Controller
     public function get()
     {
         try {
-            $withdraws = Withdraw::with([
-                'user:id,name,account_number,plan_id',
-                'currency:id,name'
-            ])->orderBy('created_at', 'desc')->get();
-            $withdraws->each(function ($withdraw) {
-                $withdraw->user->makeHidden(['id']);
-                $withdraw->currency->makeHidden(['id']);
-            });
+            $withdraws = Withdraw::with(
+                [
+                    'user:id,first_name,account_number,plan_id',
+                    'currency:id,name'
+                ],
+            )->orderBy('created_at', 'desc')->get();
+            $withdraws->each(
+                function ($withdraw) {
+                    $withdraw->user->makeHidden(['id']);
+                    $withdraw->currency->makeHidden(['id']);
+                },
+            );
             return $this->successResponse(
                 $withdraws,
             );

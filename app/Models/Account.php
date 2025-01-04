@@ -12,7 +12,7 @@ class Account extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'bank_id',
+        'currency_id',
         'account_number',
         'comment',
     ];
@@ -21,8 +21,6 @@ class Account extends Model
     {
         return $this->belongsTo(
             Currency::class,
-            'bank_id',
-            'id',
         );
     }
     public function user()

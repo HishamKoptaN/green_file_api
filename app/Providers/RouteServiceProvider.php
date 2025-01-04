@@ -25,34 +25,18 @@ class RouteServiceProvider extends ServiceProvider
     }
     public function map()
     {
-        $this->mapArtisanRoutes();
-        $this->mapAuthApiRoutes();
+        $this->mapAuthRoutes();
         $this->mapAppApiRoutes();
         $this->mapDashApiRoutes();
         $this->mapWebRoutes();
+        $this->mapArtisanRoutes();
     }
-    protected function mapArtisanRoutes()
-    {
 
-        Route::prefix('artisan')
-            ->middleware('api')
-            ->namespace($this->namespace)
-            ->group(
-                base_path(
-                    'routes/artisan.php',
-                ),
-            );
-    }
-    protected function mapAuthApiRoutes()
+    protected function mapAuthRoutes()
     {
-        Route::prefix('auth')
-            ->middleware('api')
-            ->namespace($this->namespace)
-            ->group(
-                base_path(
-                    'routes/auth.php',
-                ),
-            );
+        Route::middleware('api') // أو 'auth:api' حسب الحالة
+            ->prefix('auth')
+            ->group(base_path('routes/auth.php'));
     }
     protected function mapAppApiRoutes()
     {
@@ -84,6 +68,17 @@ class RouteServiceProvider extends ServiceProvider
             ->group(
                 base_path(
                     'routes/web.php',
+                ),
+            );
+    }
+    protected function mapArtisanRoutes()
+    {
+        Route::prefix('artisan')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(
+                base_path(
+                    'routes/artisan.php',
                 ),
             );
     }

@@ -28,8 +28,8 @@ class Task extends Model
     {
         return $this->belongsToMany(User::class, 'user_tasks');
     }
-    public function userTasks()
+    public function taskProofs()
     {
-        return $this->hasMany(UserTask::class, 'task_id');
+        return $this->hasMany(TaskProof::class, 'task_id');
     }
 }

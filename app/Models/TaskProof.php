@@ -10,7 +10,6 @@ use Carbon\Carbon;
 class TaskProof extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'status',
         'image',
@@ -19,7 +18,6 @@ class TaskProof extends Model
         'created_at',
         'updated_at',
     ];
-
     // تنسيق تواريخ الإنشاء والتحديث
     public function createdAt(): Attribute
     {

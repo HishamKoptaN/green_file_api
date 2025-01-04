@@ -6,14 +6,13 @@ use App\Http\Controllers\App\DashAppController;
 use App\Http\Controllers\App\BuySellAppController;
 use App\Http\Controllers\App\SupportChatAppController;
 use App\Http\Controllers\App\PlansAppController;
-use App\Http\Controllers\App\DepositAppController;
+use App\Http\Controllers\App\DepositsAppController;
 use App\Http\Controllers\App\WithdrawAppController;
 use App\Http\Controllers\App\AccountsAppController;
 use App\Http\Controllers\App\NotificationsAppController;
 use App\Http\Controllers\App\TransferAppController;
 use App\Http\Controllers\App\TasksAppController;
 use App\Http\Controllers\App\TransactionsAppController;
-use App\Http\Controllers\App\PublicAppController;
 use App\Http\Controllers\App\ProfileAppController;
 use App\Http\Controllers\App\WithdrawsDepositsAppController;
 use App\Models\User;
@@ -36,11 +35,11 @@ Route::any(
     '/profile',
     [
         ProfileAppController::class,
-        'handleProfile',
+        'handleRequest',
     ],
 );
 Route::any(
-    '/plans/rates',
+    '/plans-rates',
     [
         PlansAppController::class,
         'getPlansRates',
@@ -67,25 +66,24 @@ Route::any(
         'handleRequest',
     ],
 );
-//
 Route::any(
-    '/deposit',
+    '/deposits',
     [
-        DepositAppController::class,
-        'handleDeposit',
+        DepositsAppController::class,
+        'handleRequest',
+    ],
+);
+Route::any(
+    '/deposit-rates',
+    [
+        DepositsAppController::class,
+        'getEmployeeAccounts',
     ],
 );
 Route::any(
     '/employee-accounts',
     [
-        DepositAppController::class,
-        'getEmployeeAccounts',
-    ],
-);
-Route::any(
-    '/deposit/rates',
-    [
-        DepositAppController::class,
+        DepositsAppController::class,
         'getEmployeeAccounts',
     ],
 );
@@ -105,7 +103,7 @@ Route::any(
     ],
 );
 Route::any(
-    '/withdraw/rates',
+    '/withdraw-rates',
     [
         WithdrawAppController::class,
         'getWithdrawRates',
@@ -141,7 +139,10 @@ Route::any(
 );
 Route::get(
     '/task/details/{id}',
-    [TasksAppController::class, 'getTaskDetails'],
+    [
+        TasksAppController::class,
+        'getTaskDetails',
+    ],
 );
 Route::get(
     '/trans',
@@ -151,17 +152,12 @@ Route::get(
     ],
 );
 Route::get(
-    '/public',
-    [
-        PublicAppController::class,
-        'handlePublic',
-    ],
-);
-Route::get(
     '/settings',
     function () {
-        $plans_admin = User::where('role', 5)
-            ->first();
+        $plans_admin = User::where(
+            'role',
+            5,
+        )->first();
         if (!$plans_admin) {
             return response()->json(
                 [

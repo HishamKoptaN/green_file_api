@@ -18,7 +18,7 @@ class TransferSeeder extends Seeder
             return;
         }
         $image =  ['invoice1.png', 'invoice2.png', 'invoice3.png'];
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $amount = $this->getRandomAmount();
             $rate = $this->getRandomRate();
             $netAmount = $amount - ($amount * $rate / 100);

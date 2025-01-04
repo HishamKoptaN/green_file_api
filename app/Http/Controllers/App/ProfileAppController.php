@@ -13,69 +13,60 @@ use App\Models\User;
 
 class ProfileAppController extends Controller
 {
-    public function handleProfile(Request $request)
-    {
+    public function handleRequest(
+        Request $request,
+    ) {
         switch ($request->method()) {
             case 'GET':
-                return $this->getProfile($request);
+                return $this->get(
+                    $request,
+                );
             case 'POST':
-                return $this->updateImage($request);
+                return $this->edit(
+                    $request,
+                );
             case 'PATCH':
-                return $this->updateUserProfile($request);
+                return $this->updateUserProfile(
+                    $request,
+                );
             default:
-                return response()->json(['status' => false, 'message' => 'Invalid request method'], 405);
+                return failureResponse(
+                    'Invalid request method',
+                );
         }
     }
-    public function updateImage(Request $request)
-    {
-        if (!Auth::guard('sanctum')->check()) {
-            return response()->json([
-                'status' => false,
-                'error' => __('User not authenticated')
-            ], 401);
-        }
-        $user = Auth::guard('sanctum')->user();
-        if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $image = $request->file('image');
-            $destinationPath = public_path('images/users/');
-            $oldImage = basename($user->image);
-            if ($oldImage && File::exists($destinationPath . $oldImage)) {
-                File::delete($destinationPath . $oldImage);
+    public function edit(
+        Request $request,
+    ) {
+        try {
+            $user = Auth::guard('sanctum')->user();
+            $user->image =
+                updateImage(
+                    $request->file('image'),
+                    'users',
+                    $user->image
+                );
+            if ($request->filled('first_name')) {
+                $user->first_name = $request->first_name;
             }
-            $name = time() . '_' . $image->getClientOriginalName();
-            if (!File::exists($destinationPath)) {
-                File::makeDirectory($destinationPath, 0755, true);
+            if ($request->filled('last_name')) {
+                $user->last_name = $request->last_name;
             }
-            $image->move($destinationPath, $name);
-            $user->image = "https://aquan.aquan.website/api/show/image/users/$name";
+            if ($request->filled('address')) {
+                $user->address = $request->address;
+            }
+            if ($request->filled('phone')) {
+                $user->phone = $request->phone;
+            }
             $user->save();
-            return response()->json([
-                'status' => true,
-                'user' => $user
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => false,
-                'error' => __('No image uploaded or invalid image')
-            ], 400);
+            $user->load('balance');
+            return successResponse(
+                $user,
+            );
+        } catch (\Exception $e) {
+            return failureResponse(
+                __('Failed to update user: ') . $e->getMessage(),
+            );
         }
-    }
-    public function updateUserProfile(Request $request)
-    {
-        if (!Auth::guard('sanctum')->check()) {
-            return response()->json([
-                'status' => false,
-                'error' => __('User not authenticated')
-            ], 401);
-        }
-        $user = Auth::guard('sanctum')->user();
-        $user->name = $request->name;
-        $user->address = $request->address;
-        $user->phone = $request->phone;
-        $user->save();
-        return response()->json([
-            'status' => true,
-            'user' => $user
-        ], 200);
     }
 }

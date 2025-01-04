@@ -22,7 +22,7 @@ class AccountsAppController extends Controller
             case 'PATCH':
                 return $this->updateAccountNumbers($request);
             default:
-                return response()->json(['status' => false, 'message' => 'Invalid request method']);
+                return $this->failureResponse();
         }
     }
     public function getAccounts(Request $request)
@@ -32,75 +32,90 @@ class AccountsAppController extends Controller
             $userId = $user->id;
             $accounts = Account::where('user_id', $userId)->get();
             $currencies = Currency::all();
-            $userCurrencyIds = $accounts->pluck('bank_id')->toArray();
+            $userCurrencyIds = $accounts->pluck('currency_id')->toArray();
             foreach ($currencies as $currency) {
                 if (!in_array($currency->id, $userCurrencyIds)) {
-                    Account::create([
-                        'user_id' => $userId,
-                        'bank_id' => $currency->id,
-                        'comment' => 'Account for user ' . $userId . ' with currency ' . $currency->name,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    Account::create(
+                        [
+                            'user_id' => $userId,
+                            'currency_id' => $currency->id,
+                            'comment' => 'Account for user ' . $userId . ' with currency ' . $currency->name,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ],
+                    );
                 }
             }
             $accounts = Account::where('user_id', $userId)
                 ->with(['currency:id,name'])->get()
-                ->map(function ($account) {
-                    $account->currency->makeHidden('id');
-                    return $account;
-                });
-            return response()->json([
-                'status' => true,
-                'accounts' => $accounts,
-            ]);
+                ->map(
+                    function ($account) {
+                        $account->currency->makeHidden('id');
+                        return $account;
+                    },
+                );
+
+            return $this->successResponse(
+                $accounts,
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failureResponse(
+                $e->getMessage(),
+            );
         }
     }
     public function updateAccountNumbers(Request $request)
     {
         try {
             $user = Auth::guard('sanctum')->user();
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'error' => 'Unauthenticated user.',
+                ], 401);
+            }
             $userId = $user->id;
-            $accountsData = $request->input('accounts');
+            $accountsData = $request->all();
             if (!$accountsData || !is_array($accountsData)) {
                 return response()->json([
                     'status' => false,
-                    'error' => 'Invalid data format.',
+                    'error' => 'Invalid data format. Expected a list of accounts.',
                 ], 400);
             }
-            foreach ($accountsData as $accountData) {
-                $account = Account::where('id', $accountData['id'])->first();
-                if ($account) {
-                    $account->update([
-                        'account_number' => $accountData['account_number'] ?? $account->account_number,
-                    ]);
-                } else {
-                    return response()->json([
-                        'status' => false,
-                        'error' => 'Account with ID ' . $accountData['id'] . ' not found.',
-                    ], 404);
+            $accountIds = collect($accountsData)->pluck('id')->toArray();
+            $accounts = Account::where('user_id', $userId)
+                ->whereIn('id', $accountIds)
+                ->get();
+            if ($accounts->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'error' => 'No valid accounts found for the user.',
+                ], 404);
+            }
+            foreach ($accounts as $account) {
+                $newData = collect($accountsData)->firstWhere('id', $account->id);
+                if ($newData) {
+                    $account->update(
+                        [
+                            'account_number' => $newData['account_number'] ?? $account->account_number,
+                        ],
+                    );
                 }
             }
-            $accounts = Account::where('user_id', $userId)
-                ->with(['currency:id,name'])->get()
-                ->map(function ($account) {
-                    $account->currency->makeHidden('id');
-                    return $account;
-                });
-            return response()->json([
-                'status' => true,
-                'accounts' => $accounts,
-            ]);
+
+            $updatedAccounts = Account::where('user_id', $userId)
+                ->with('currency:id,name')
+                ->get()
+                ->map(
+                    function ($account) {
+                        $account->currency->makeHidden('id');
+                        return $account;
+                    },
+                );
+
+            return $this->successResponse($updatedAccounts);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failureResponse($e->getMessage());
         }
     }
 }

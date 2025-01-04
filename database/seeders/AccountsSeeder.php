@@ -15,14 +15,16 @@ class AccountsSeeder extends Seeder
         $banks = ['1', '2', '3', '4', '5'];
         foreach ($users as $user) {
             foreach ($banks as $bank) {
-                Account::create([
-                    'user_id' => $user,
-                    'bank_id' => $bank,
-                    'account_number' => '24' . rand(10000, 99999),
-                    'comment' => 'Comment for user ' . $user . ' at bank ' . $bank,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                Account::create(
+                    [
+                        'user_id' => $user,
+                        'currency_id' => $bank,
+                        'account_number' => '24' . rand(10000, 99999),
+                        'comment' => 'Comment for user ' . $user . ' at bank ' . $bank,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                );
             }
         }
     }

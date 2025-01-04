@@ -16,9 +16,11 @@ class DashSupportController extends Controller
             $chat = Chat::where('id', $chat_id)
                 ->with(['user', 'messages'])
                 ->firstOrFail();
-            $chat->messages()->update([
-                'readed_at' => now()
-            ]);
+            $chat->messages()->update(
+                [
+                    'readed_at' => now()
+                ],
+            );
         }
         $chats = Chat::withCount('has_unreaded_message')
             ->with(['user'])

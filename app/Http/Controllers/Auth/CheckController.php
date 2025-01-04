@@ -4,26 +4,35 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Traits\ApiResponseTrait;
 
-class CheckController extends Controller
+class CheckAuthController extends Controller
 {
-    use ApiResponseTrait;
     public function check()
     {
         try {
             if (!Auth::guard('sanctum')->check()) {
-                return $this->failureResponse(
+                return failureResponse(
                     [],
                     401,
                 );
             }
-            $user = Auth::guard('sanctum')->user();
-            return $this->successResponse(
-                $user,
+            $user = Auth::guard('sanctum')->user()->load(
+                [
+                    'balance',
+                    'userPlan.plan',
+                ],
+            );
+            $isVerified = !is_null(
+                $user->verified_at,
+            );
+            return successResponse(
+                [
+                    'verified' => $isVerified,
+                    'user' => $user,
+                ],
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return failureResponse(
                 $e->getMessage(),
             );
         }

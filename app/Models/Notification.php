@@ -22,7 +22,10 @@ class Notification extends Model
     }
     public function users()
     {
-        return $this->belongsToMany(User::class, 'notification_user');
+        return $this->belongsToMany(
+            User::class,
+            'notification_user'
+        );
     }
     public function notifiable()
     {

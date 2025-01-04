@@ -5,17 +5,14 @@ namespace App\Http\Controllers\Dash;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Permission as SpatiePermission;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class MainDashController extends Controller
 {
     public function handleMain(Request $request)
     {
         switch ($request->method()) {
-              case 'GET':
+            case 'GET':
                 return $this->getUserPermissions($request);
             case 'POST':
                 return $this->uploadFile($request);

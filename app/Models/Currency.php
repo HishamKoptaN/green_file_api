@@ -25,13 +25,12 @@ class Currency extends Model
     ];
     public function getStatusAttribute($value)
     {
-        return (bool) $value; // تحويل القيمة إلى boolean
+        return (bool) $value;
     }
     protected $casts =  [
         'payment_info' => Serialize::class,
         'updated_at' => 'datetime',
     ];
-
     public function name(): Attribute
     {
         return Attribute::make(

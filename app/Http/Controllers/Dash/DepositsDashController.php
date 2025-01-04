@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Models\Balance;
 use App\Traits\ApiResponseTrait;
 
 class DepositsDashController extends Controller
 {
 
     use ApiResponseTrait;
-    public function handleRequest(Request $request, $id = null)
-    {
+    public function handleRequest(
+        Request $request,
+        $id = null,
+    ) {
         switch ($request->method()) {
             case 'GET':
                 return $this->get();
@@ -32,7 +35,7 @@ class DepositsDashController extends Controller
             $deposits = Deposit::with(
                 [
                     'user',
-                    'employee:id,name',
+                    'employee:id,first_name',
                     'currency:id,name'
                 ],
             )->orderBy('created_at', 'desc')->get();
@@ -66,17 +69,18 @@ class DepositsDashController extends Controller
                 $request->id,
             );
             $deposit->status = $request->status;
+            if ($request->status === 'accepted') {
+                $deposit->approved_at = now();
+            }
             $deposit->save();
-            if (
-                $request->status === 'accepted'
-            ) {
-                $user = User::find(
+            if ($request->status === 'accepted') {
+                $balance = Balance::where(
+                    'user_id',
                     $deposit->user_id,
-
-                );
-                if ($user) {
-                    $user->balance += $deposit->amount;
-                    $user->save();
+                )->first();
+                if ($balance) {
+                    $balance->suspended_balance += $deposit->amount;
+                    $balance->save();
                 }
             }
             return $this->successResponse(

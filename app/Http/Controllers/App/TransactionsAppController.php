@@ -6,12 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transfer;
-use App\Traits\ApiResponseTrait;
 
 
 class TransactionsAppController extends Controller
 {
-    use ApiResponseTrait;
     public function handleRequest(Request $request)
     {
         switch ($request->method()) {
@@ -33,7 +31,7 @@ class TransactionsAppController extends Controller
     {
         try {
             if (!Auth::guard('sanctum')->check()) {
-                return $this->failureResponse(
+                return failureResponse(
                     'User not authenticated',
                     401,
                 );
@@ -43,23 +41,17 @@ class TransactionsAppController extends Controller
                 'senderCurrency:id,name',
                 'receiverCurrency:id,name'
             ])->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-            if ($transfers->isEmpty()) {
-                return $this->failureResponse(
-                    'No transfers found',
-                    404,
-                );
-            }
             $transfers->each(
                 function ($transfer) {
                     $transfer->senderCurrency->makeHidden(['id']);
                     $transfer->receiverCurrency->makeHidden(['id']);
                 },
             );
-            return $this->successResponse(
+            return successResponse(
                 $transfers,
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return failureResponse(
                 $e->getMessage(),
             );
         }

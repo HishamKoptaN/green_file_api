@@ -12,7 +12,6 @@ use App\Traits\ApiResponseTrait;
 
 class UsersDashController extends Controller
 {
-
     use ApiResponseTrait;
     public function handleRequest(
         Request $request,
@@ -42,42 +41,19 @@ class UsersDashController extends Controller
                 return $this->failureResponse();
         }
     }
-    protected function get(Request $request)
-    {
+    protected function get(
+        Request $request,
+    ) {
         try {
-            $users = User::all();
-            $usersWithPermissions = $users->map(
-                function ($user) {
-                    $user_permissions = DB::table('user_has_permissions')
-                        ->join('permissions', 'user_has_permissions.permission_id', '=', 'permissions.id')
-                        ->where('user_has_permissions.user_id', $user->id)
-                        ->select('permissions.name', 'user_has_permissions.permission_id')
-                        ->get();
-
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'status' => $user->status,
-                        'balance' => $user->balance,
-                        'plan_id' => $user->plan_id,
-                        'phone' => $user->phone,
-                        'address' => $user->address,
-                        'comment' => $user->comment,
-                        'created_at' => $user->created_at,
-                        'updated_at' => $user->updated_at,
-                        'upgraded_at' => $user->updated_at,
-                        'inactivate_end_at' => $user->inactivate_end_at,
-                        'user_permissions' => $user_permissions,
-                    ];
-                },
-            );
-            $permissions = Permission::all();
-            return $this->successResponse(
+            $users = User::with(
                 [
-                    'users' => $usersWithPermissions,
-                    'permissions' => $permissions,
-                ]
+                    'roles',
+                    'balance',
+                    'userPlan',
+                ],
+            )->get();
+            return $this->successResponse(
+                $users,
             );
         } catch (\Exception $e) {
             return $this->failureResponse(
@@ -85,57 +61,51 @@ class UsersDashController extends Controller
             );
         }
     }
-
-    protected function updateUser(Request $request)
-    {
-        if (!$request->has('id')) {
-            return response()->json([
-                'status' => false,
-                'message' => __('User ID is required'),
-            ], 400);
-        }
-        $user = User::find($request->id);
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => __('User not found'),
-            ], 404);
-        }
-        $dataToUpdate = [
-            "status"    => $request->status,
-            "balance"   => $request->balance,
-            "comment"   => $request->comment,
-        ];
-
-        if ($request->status === 'active') {
-            $dataToUpdate['inactivate_end_at'] = null;
-        } elseif ($request->has('block_type') && $request->has('block_time')) {
-            $dataToUpdate['inactivate_end_at'] = $request->block_type == 'permanent'
-                ? Carbon::now()->addYears(10)
-                : Carbon::now()->addDays($request->block_time);
-        }
-        $user->update($dataToUpdate);
-        $permissions = $request->input('permissions');
-        if (!is_array($permissions) || empty($permissions)) {
-            return response()->json([
-                'status' => false,
-                'message' => __('Permissions should be provided as a non-empty array'),
-            ], 400);
-        }
-
-        $modelType = 'App\\Models\\User';
-        $userId = $user->id;
-        $data = [];
-
-        foreach ($permissions as $permissionId) {
-            $data[] = [
-                'permission_id' => $permissionId,
+    protected function updateUser(
+        Request $request,
+    ) {
+        try {
+            $user = User::find(
+                $request->id,
+            );
+            $user->load(
+                'balance',
+            );
+            if ($request->has(
+                'balance',
+            )) {
+                $user->balance->update(
+                    $request->input(
+                        'balance',
+                    ),
+                );
+            }
+            $updateRoles = collect(
+                $request->roles,
+            )->pluck(
+                'id',
+            )->toArray();
+            $user->roles()->sync(
+                $updateRoles,
+            );
+            $dataToUpdate = [
+                "status" => $request->status,
+                "plan_id" => $request->plan_id,
+                "comment" => $request->comment,
             ];
+            $user->update(
+                $dataToUpdate,
+            );
+            $userWithRoles = $user->load(
+                'roles.permissions',
+            );
+            return $this->successResponse(
+                $userWithRoles
+            );
+        } catch (\Exception $e) {
+            return $this->failureResponse(
+                $e->getMessage(),
+            );
         }
-        DB::table('model_has_permissions')->where('model_id', $userId)->delete();
-        DB::table('model_has_permissions')->insert($data);
-        return response()->json([
-            'status' => true,
-        ], 200);
     }
 }

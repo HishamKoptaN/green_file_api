@@ -9,8 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Models\Balance;
+use App\Models\RoleUser;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -18,52 +20,71 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'status',
         'online_offline',
+        'first_name',
+        'last_name',
         'account_number',
-        'token',
-        'name',
-        'username',
-        'password',
         'email',
+        'password',
         'image',
         'address',
         'phone',
         'phone_verified_at',
-        'balance',
-        'phone_verification_code',
         'inactivate_end_at',
-        'upgraded_at',
         'comment',
-        'refcode',
-        'account_info',
-        'balance',
-        'confirmation_code',
-        'reset_code',
-        'refered_by',
-        'plan_id',
-        'role'
+        'country_code',
+        'verified_at',
     ];
-    public function getStatusAttribute($value)
+    public function balance()
     {
-        return (bool) $value; // تحويل القيمة إلى boolean
+        return $this->hasOne(
+            Balance::class,
+        );
+    }
+
+    public function account()
+    {
+        return $this->hasOne(
+            Account::class,
+            'user_id',
+        );
+    }
+    public function userRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Role::class,
+            'role_users',
+            'user_id',
+            'role_id',
+        );
     }
     public function notifications()
     {
-        return $this->belongsToMany(Notification::class, 'notification_user');
+        return $this->belongsToMany(
+            Notification::class,
+            'notification_user',
+            'user_id',
+            'notification_id',
+        );
     }
+    public function getStatusAttribute(
+        $value,
+    ) {
+        return (bool) $value;
+    }
+
+
     public function accounts()
     {
-        return $this->hasMany(Account::class);
+        return $this->hasMany(
+            Account::class,
+        );
     }
     public function role()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(
+            Role::class,
+        );
     }
-
-    public function plan()
-    {
-        return $this->belongsTo(Plan::class);
-    }
-
     public function createdDate(): Attribute
     {
         return Attribute::make(
@@ -112,9 +133,9 @@ class User extends Authenticatable implements JWTSubject
     }
     public static function findOnlineEmployee()
     {
-        return DB::table('user_has_roles')
-            ->join('users', 'user_has_roles.user_id', '=', 'users.id')
-            ->where('user_has_roles.role_id', 3)
+        return DB::table('role_users')
+            ->join('users', 'role_users.user_id', '=', 'users.id')
+            ->where('role_users.role_id', 3)
             ->where('users.online_offline', 'online')
             ->select('users.*')
             ->first();

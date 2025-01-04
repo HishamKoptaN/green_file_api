@@ -12,14 +12,46 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginGoogleController extends Controller
 {
+    public function completeGoogleLogin(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'password' => 'required|max:100|confirmed',
+                'code' => 'nullable|string',
+            ],
+        );
 
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'error' => $validator->errors()->first()
+                ],
+            );
+        }
+
+        $request->user()->update(
+            [
+                'password' => Hash::make($request->password),
+                'code' => $request->code
+            ],
+        );
+
+        return [
+            'status' => true,
+        ];
+    }
     public function googleLogin(Request $request)
     {
         $create_password = false;
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'name' => 'required|string'
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|email',
+                'name' => 'required|string'
+            ],
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -32,27 +64,22 @@ class LoginGoogleController extends Controller
 
         if (!$user) {
             $create_password = true;
-            $user = User::create([
-                'status' => "active",
-                'token' => str()->random(),
-                'name' => $request->name,
-                'username' => $request->name . '-' . str()->random(3),
-                'password' => Hash::make(str()->random()),
-                'email' => $request->email,
-                'image' => "default.png",
-                'address' => null,
-                'phone' => null,
-                'phone_verified_at' => null,
-                'balance' => 0,
-                'phone_verification_code' => null,
-                'inactivate_end_at' => null,
-                'message' => null,
-                'refcode' => strtoupper(str()->random(6)),
-                'account_info' => "",
-                'email_verified_at' => now(),
-                'refered_by' => null,
-                'plan_id' => 1,
-            ]);
+            $user = User::create(
+                [
+                    'status' => "active",
+                    'token' => str()->random(),
+                    'name' => $request->name,
+                    'first_name' => $request->name . '-' . str()->random(3),
+                    'last_name' => $request->name . '-' . str()->random(3),
+                    'password' => Hash::make(str()->random()),
+                    'email' => $request->email,
+                    'image' => "default.png",
+                    'address' => null,
+                    'phone' => null,
+                    'inactivate_end_at' => null,
+                    'message' => null,
+                ],
+            );
 
             $currencies = Currency::get();
             $account_info = [];

@@ -13,35 +13,47 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class PermissionsDashController extends Controller
 {
-
-    public function handlePermissions(Request $request)
-    {
+    public function handleRequest(
+        Request $request,
+        $id = null
+    ) {
         switch ($request->method()) {
             case 'GET':
-                return $this->getPermissions($request);
+                return $this->get();
             case 'POST':
-                return $this->uploadFile($request);
-
-            case 'PUT':
-                return $this->updateFile($request);
+                return $this->post(
+                    $request,
+                    $id
+                );
+            case 'PATCH':
+                return $this->patch(
+                    $request,
+                    $id
+                );
             case 'DELETE':
-                return $this->deleteFile($request);
+                return $this->delete(
+                    $id
+                );
             default:
-                return response()->json(['status' => false, 'message' => 'Invalid request method']);
+                return $this->failureResponse();
         }
     }
 
-    public function getPermissions()
+
+    public function get()
     {
-        $permissions = Permission::get();
-        return response()->json(
-            [
-                'permissions' => $permissions,
-                'status' => true
-            ],
-        );
+        try {
+            $permissions = Permission::all();
+            return successResponse(
+                $permissions,
+            );
+        } catch (\Exception $e) {
+            return $this->failureResponse(
+                $e->getMessage(),
+            );
+        }
     }
-    public function updateUserPermissions(Request $request, $userId)
+    public function patch(Request $request, $userId)
     {
         $user = User::findOrFail($userId);
         $permissions = $request->input('permissions');

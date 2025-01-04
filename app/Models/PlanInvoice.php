@@ -13,28 +13,30 @@ class PlanInvoice extends Model
     protected $fillable = [
         'status',
         'user_id',
+        'plan_id',
         'amount',
         'image',
-        'method',
+        'currency_id',
         'comment',
         'created_at',
-        'plan_invoice_id',
     ];
     public function createdAt(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => Carbon::parse($value)->format('Y-m-d H:i'),
+            get: fn(mixed $value) => Carbon::parse($value)->format('Y-m-d H:i'),
         );
     }
     public function updatedAt(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => Carbon::parse($value)->format('Y-m-d H:i'),
+            get: fn(mixed $value) => Carbon::parse($value)->format('Y-m-d H:i'),
         );
     }
     public function currency()
     {
-        return $this->belongsTo(Currency::class, 'plan_invoice_id');
+        return $this->belongsTo(
+            Currency::class,
+        );
     }
     public function user()
     {

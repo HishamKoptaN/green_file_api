@@ -15,7 +15,7 @@ class NotificationsAppController extends Controller
     {
         switch ($request->method()) {
             case 'GET':
-                return $this->getNotifications(
+                return $this->get(
                     $request,
                 );
             case 'POST':
@@ -34,30 +34,22 @@ class NotificationsAppController extends Controller
                 return $this->failureResponse();
         }
     }
-    public function get() {}
-    public function getNotifications(Request $request)
+    public function get(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
-        if (!$user) {
-            return $this->failureResponse(
-                [
-                    __('User not authenticated'),
-                    401
-                ],
-            );
-        }
         $userId = $user->id;
-        $notifications = Notification::where('type', 'public')
-            ->where(
-                function ($query) use ($userId) {
-                    $query->whereJsonContains(
-                        'notifiable_id',
-                        $userId,
+        $notifications = Notification::where('public', true)
+            ->orWhereHas(
+                'users',
+                function ($query) use ($user) {
+                    $query->where(
+                        'user_id',
+                        $user->id,
                     );
                 },
             )
-            ->latest()
             ->get();
+
         return $this->successResponse(
             $notifications,
         );

@@ -4,52 +4,52 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Traits\ApiResponseTrait;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-
-    use ApiResponseTrait;
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required',
-            'password' => 'required'
+    public function login(
+        Request $request,
+    ) {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
         ]);
-        if ($validator->fails()) {
-            return $this->failureResponse(
-                $validator->errors()->first(),
+        $user = \App\Models\User::where('email', $request->email)->first();
+        if (!$user) {
+            return failureResponse(
+                'Email does not exist.',
             );
         }
-        $credentials = [
-            'email' => $request->email,
-            'password' => $request->password
-        ];
-        if (!Auth::attempt($credentials)) {
-            return $this->failureResponse(
-                __('The provided credentials do not match our records.'),
+        if (!Hash::check($request->password, $user->password)) {
+            return failureResponse(
+                'Invalid password.',
             );
+        }
+        if (!$user->status) {
+            return failureResponse(__('You have been blocked from the platform.'));
         }
         try {
-            $user = Auth::user();
-            if ($user) {
-                if (!$user->status) {
-                    return $this->failureResponse(
-                        __('You have been blocked from the platform.'),
-                    );
-                }
-                $token = $user->createToken("auth", ['*'], now()->addWeek());
-                return $this->successResponse(
-                    [
-                        'token' => $token->plainTextToken,
-                        'user' => $user
-                    ],
-                );
-            }
+            $token = $user->createToken("auth", ['*'], now()->addWeek());
+            $user->load(
+                [
+                    'balance',
+                    'userPlan.plan',
+                ],
+            );
+            $isVerified = !is_null(
+                $user->verified_at,
+            );
+            return successResponse(
+                [
+                    'token' => $token->plainTextToken,
+                    'verified' => $isVerified,
+                    'user' => $user
+                ],
+            );
         } catch (\Throwable $th) {
-            return $this->failureResponse(
+            return failureResponse(
                 $th->getMessage(),
             );
         }

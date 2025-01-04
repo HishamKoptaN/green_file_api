@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\App;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\Auth;
@@ -26,34 +27,36 @@ class UserAppController extends Controller
         ], 200);
     }
 
-    public function updateAccountsInfo(Request $request)
-    {
+    public function updateAccountsInfo(
+        Request $request,
+    ) {
         $user = Auth::user();
 
-        $request->validate([
-            'accountInfo' => 'required|array',
-            'accountInfo.*.currency' => 'required|string',
-            'accountInfo.*.value' => 'required|numeric',
-        ]);
-
+        $request->validate(
+            [
+                'accountInfo' => 'required|array',
+                'accountInfo.*.currency' => 'required|string',
+                'accountInfo.*.value' => 'required|numeric',
+            ],
+        );
         // Update the user's account info
         $user->account_info = $request->accountInfo;
         $user->save();
-
         return response()->json([
             'status' => true,
         ], 200);
     }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
+
+    public function index(
+        Request $request,
+    ) {
         $user = $request->user();
-        return response()->json([
-            'status' => true,
-            'user' => $user
-        ]);
+        return response()->json(
+            [
+                'status' => true,
+                'user' => $user
+            ],
+        );
     }
 
     public function accountInfo(Request $request)

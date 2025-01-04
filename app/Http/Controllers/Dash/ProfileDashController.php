@@ -9,25 +9,42 @@ use App\Models\User;
 
 class ProfileDashController extends Controller
 {
-     public function handleProfile(Request $request)
-    {
+    public function handleProfile(
+        Request $request,
+    ) {
         switch ($request->method()) {
             case 'GET':
-                return $this->getStatus($request);
+                return $this->getStatus(
+                    $request,
+                );
             case 'PATCH':
-                return $this->uploadFile($request);
+                return $this->uploadFile(
+                    $request,
+                );
             case 'POST':
-                return $this->uploadFile($request);
+                return $this->uploadFile(
+                    $request,
+                );
             case 'PUT':
-                return $this->updateStatus($request);
+                return $this->updateStatus(
+                    $request,
+                );
             case 'DELETE':
-                return $this->deleteFile($request);
+                return $this->deleteFile(
+                    $request,
+                );
             default:
-                return response()->json(['status' => false, 'message' => 'Invalid request method']);
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Invalid request method',
+                    ],
+                );
         }
     }
-    public function getStatus(Request $request)
-    {
+    public function getStatus(
+        Request $request,
+    ) {
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json([

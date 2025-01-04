@@ -36,10 +36,16 @@ class TransfersDashController extends Controller
     }
     public function get()
     {
+
+
+
+
+
+
         $transfers = Transfer::with(
             [
-                'user:id,name',
-                'employee:id,name',
+                'user:id,first_name',
+                'employee:id,first_name',
                 'senderCurrency:id,name',
                 'receiverCurrency:id,name'
             ],
@@ -96,8 +102,8 @@ class TransfersDashController extends Controller
             }
             $transfer = Transfer::with(
                 [
-                    'user:id,name',
-                    'employee:id,name',
+                    'user:id,first_name',
+                    'employee:id,first_name',
                     'senderCurrency:id,name',
                     'receiverCurrency:id,name',
                 ],

@@ -2,34 +2,34 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dash\AccountsDashController;
-use App\Http\Controllers\Dash\PlansInvoicesDashController;
+use App\Http\Controllers\Dash\PlanInvoicesDashController;
 use App\Http\Controllers\Dash\PlansDashController;
 use App\Http\Controllers\Dash\WithdrawsDashController;
 use App\Http\Controllers\Dash\DepositsDashController;
 use App\Http\Controllers\Dash\TasksDashController;
-use App\Http\Controllers\Dash\MainDashController;
 use App\Http\Controllers\Dash\TransfersDashController;
 use App\Http\Controllers\Dash\SupportDashController;
 use App\Http\Controllers\Dash\RatesDashController;
-use App\Http\Controllers\Dash\AppControllerDashController;
+use App\Http\Controllers\Dash\AppControlDashController;
 use App\Http\Controllers\Dash\NotificationsDashController;
 use App\Http\Controllers\Dash\UsersDashController;
+use App\Http\Controllers\Dash\RolesDashController;
 use App\Http\Controllers\Dash\PermissionsDashController;
 use App\Http\Controllers\Dash\TaskProofsDashController;
 use App\Http\Controllers\Dash\ProfileDashController;
 
 Route::any(
-    '/main',
+    '/roles/{id?}',
     [
-        MainDashController::class,
-        'handleMain',
+        RolesDashController::class,
+        'handleRequest',
     ],
 );
-Route::get(
-    '/permissions',
+Route::any(
+    '/permissions/{id?}',
     [
         PermissionsDashController::class,
-        'handlePermissions',
+        'handleRequest',
     ],
 );
 Route::any(
@@ -68,9 +68,9 @@ Route::any(
     ],
 );
 Route::any(
-    '/plansInvoices/{id?}',
+    '/plan-invoices/{id?}',
     [
-        PlansInvoicesDashController::class,
+        PlanInvoicesDashController::class,
         'handleRequest',
     ],
 );
@@ -83,9 +83,9 @@ Route::any(
 );
 
 Route::any(
-    '/controller/{id?}',
+    '/app-control/{id?}',
     [
-        AppControllerDashController::class,
+        AppControlDashController::class,
         'handleRequest',
     ],
 );

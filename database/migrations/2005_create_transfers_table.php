@@ -13,9 +13,8 @@ return new class extends Migration
             'transfers',
             function (Blueprint $table) {
                 $table->id();
-                $table->string("status")->default('pending')->comment(
-                    'pending-accepted-rejected',
-                );
+
+                $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
                 $table->unsignedDouble('amount');
                 $table->unsignedDouble('net_amount');
                 $table->unsignedDouble('rate');
@@ -38,7 +37,7 @@ return new class extends Migration
                     ->cascadeOnUpdate();
                 $table->foreignId('receiver_currency_id')
                     ->constrained('currencies')
-                    ->cascadeOnDelete()
+
                     ->cascadeOnUpdate();
                 $table->string("receiver_account");
                 $table->timestamps();

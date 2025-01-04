@@ -20,8 +20,8 @@ class SettingSeeder extends Seeder
 
         foreach ($settings as $name => $content) {
             Setting::updateOrCreate(
-                ['name' => $name], // البحث عن السجل بناءً على اسم الإعداد
-                ['content' => $content] // تحديث المحتوى إذا كان السجل موجودًا
+                ['name' => $name],
+                ['content' => $content]
             );
         }
     }

@@ -1,21 +1,17 @@
 <?php
 
 return [
-
-
     'defaults' => [
         'guard' => 'web',
         'passwords' => 'users',
     ],
     'guards' => [
-
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'sanctum',
-            'driver' => 'token',
+            'driver' => 'sanctum',  // استخدم هذا فقط
             'provider' => 'users',
             'hash' => false,
         ],
@@ -25,10 +21,6 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
     'passwords' => [
         'users' => [
@@ -39,5 +31,4 @@ return [
         ],
     ],
     'password_timeout' => 10800,
-
 ];

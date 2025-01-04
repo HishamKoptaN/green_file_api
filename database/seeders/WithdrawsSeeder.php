@@ -12,8 +12,18 @@ class WithdrawsSeeder extends Seeder
     public function run(): void
     {
         $user_id = [4, 5];
-        $statuses = ['pending', 'completed', 'rejected'];
-        $methods = [1, 2, 3, 4, 5,];
+        $statuses = [
+            'pending',
+            'accepted',
+            'rejected',
+        ];
+        $methods = [
+            1,
+            2,
+            3,
+            4,
+            5,
+        ];
         for ($i = 0; $i < 15; $i++) {
             DB::table('withdraws')->insert(
                 [

@@ -51,40 +51,28 @@ class PlansDashController extends Controller
     {
         try {
             $plans = Plan::all();
-            $plans_admin = DB::table('user_has_roles')
-                ->join('users', 'user_has_roles.user_id', '=', 'users.id')
-                ->where(
-                    'user_has_roles.role_id',
-                    3,
-                )
-                ->select('users.*')
-                ->first();
-            $accounts = Account::where(
-                'user_id',
-                $plans_admin->id,
-            )
+            $plans_admin = User::whereHas('roles', function ($query) {
+                $query->where('name', 'plans-admin');
+            })->first();
+            if (!$plans_admin) {
+                return $this->failureResponse('No plans-admin user found');
+            }
+            $accounts = Account::where('user_id', $plans_admin->id)
                 ->with('currency:id,name')
                 ->get();
-            $accounts->each(
-                function ($account) {
-                    $account->currency->makeHidden(['id']);
-                },
-            );
-            return $this->successResponse(
-                [
-                    'plans' => $plans,
-                    'accounts' => $accounts
-                ]
-            );
+
+            $accounts->each(function ($account) {
+                $account->currency->makeHidden(['id']);
+            });
+
+            return $this->successResponse([
+                'plans' => $plans,
+                'accounts' => $accounts
+            ]);
         } catch (\Exception $e) {
-            return $this->failureResponse(
-                $e->getMessage(),
-            );
+            return $this->failureResponse($e->getMessage());
         }
     }
-
-
-
 
     protected function post(Request $request)
     {
@@ -136,6 +124,7 @@ class PlansDashController extends Controller
                 [
                     "name"                   => $request->name,
                     "amount"                 => $request->amount,
+                    "transfer_commission"                 => $request->transfer_commission,
                     "discount"                  => $request->discount,
                     "daily_transfer_count"          => $request->daily_transfer_count,
                     "monthly_transfer_count"   => $request->monthly_transfer_count,

@@ -76,21 +76,21 @@ class InvoicesDashController extends Controller
         }
     }
 
-    protected function get()
-    {
-        try {
-            $invoices = ::all();
-            $invoices = Withdraw::all();
-            $invoices = Deposit::all();
-            return $this->successResponse(
-                $invoices,
-            );
-        } catch (\Exception $e) {
-            return $this->failureResponse(
-                $e->getMessage(),
-            );
-        }
-    }
+    // protected function get()
+    // {
+    // try {
+    //     $invoices = Invoice::all();
+    //     $invoices = Withdraw::all();
+    //     $invoices = Deposit::all();
+    //     return $this->successResponse(
+    //         $invoices,
+    //     );
+    // } catch (\Exception $e) {
+    //     return $this->failureResponse(
+    //         $e->getMessage(),
+    //     );
+    // }
+    // }
 
 
 

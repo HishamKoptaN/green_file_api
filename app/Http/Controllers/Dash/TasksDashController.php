@@ -11,8 +11,10 @@ class TasksDashController extends Controller
 {
     use ApiResponseTrait;
 
-    public function handleRequest(Request $request, $id = null)
-    {
+    public function handleRequest(
+        Request $request,
+        $id = null,
+    ) {
         switch ($request->method()) {
             case 'GET':
                 return $this->get();
@@ -24,17 +26,15 @@ class TasksDashController extends Controller
                 return $this->failureResponse('Unsupported request method', 405);
         }
     }
-
-    // إرجاع قائمة المهام
     public function get()
     {
         try {
             $tasks = Task::all();
-            return $this->successResponse(
+            return successResponse(
                 $tasks,
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return failureResponse(
                 'Failed to fetch tasks: ' . $e->getMessage(),
             );
         }
@@ -56,9 +56,9 @@ class TasksDashController extends Controller
                 ]
             );
 
-            return $this->successResponse($task);
+            return successResponse($task);
         } catch (\Exception $e) {
-            return $this->failureResponse('Failed to create task: ' . $e->getMessage());
+            return failureResponse('Failed to create task: ' . $e->getMessage());
         }
     }
 
@@ -68,7 +68,7 @@ class TasksDashController extends Controller
         $task = Task::find($id);
 
         if (!$task) {
-            return $this->failureResponse('Task not found', 404);
+            return failureResponse('Task not found', 404);
         }
         try {
             $this->validateTask($request, false);
@@ -76,13 +76,15 @@ class TasksDashController extends Controller
                 $task->image = $this->handleImageUpload($request->file('image'));
             }
 
-            $task->update([
-                'status' => $request->input('status'),
-                'name' => $request->input('name'),
-                'link' => $request->input('link'),
-                'description' => $request->input('description'),
-                'amount' => $request->input('amount'),
-            ]);
+            $task->update(
+                [
+                    'status' => $request->input('status'),
+                    'name' => $request->input('name'),
+                    'link' => $request->input('link'),
+                    'description' => $request->input('description'),
+                    'amount' => $request->input('amount'),
+                ],
+            );
 
             return $this->successResponse($task, 'Task updated successfully');
         } catch (\Exception $e) {
