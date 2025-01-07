@@ -1,25 +1,35 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\CheckAuthController;
+use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\Auth\FirebaseAuthController;
+use App\Http\Controllers\Auth\CheckController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SignUpDashController;
 use App\Http\Controllers\Auth\ChangePassController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
-// تحقق المستخدم
+
 Route::post(
     '/check',
     [
-        CheckAuthController::class,
+        CheckController::class,
         'check',
     ],
 );
+
 Route::post(
     '/login',
     [
         LoginController::class,
         'login',
+    ],
+);
+Route::post(
+    'google',
+    [
+        FirebaseAuthController::class,
+        'google',
     ],
 );
 Route::post(

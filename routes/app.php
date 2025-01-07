@@ -17,13 +17,6 @@ use App\Http\Controllers\App\ProfileAppController;
 use App\Http\Controllers\App\WithdrawsDepositsAppController;
 use App\Models\User;
 
-Route::post(
-    '/chat',
-    [
-        ChatController::class,
-        'sendMessage',
-    ],
-);
 Route::any(
     '/dash',
     [

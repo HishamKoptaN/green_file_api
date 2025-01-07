@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
     /**
@@ -35,19 +32,13 @@ class UserFactory extends Factory
             'image' => 'default.png',
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
-            'phone_verified_at' => now(),
-            'balance' => rand(10, 100),
-            'phone_verification_code' => now(),
+            'verified_at' => now(),
             'inactivate_end_at' => null,
             'message' => null,
 
             'refered_by' => (User::inRandomOrder()->first())->id
         ];
     }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
     public function unverified(): static
     {
         return $this->state(fn(array $attributes) => [
