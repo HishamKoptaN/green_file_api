@@ -1,3 +1,4 @@
+# Ignore files and directories that should not be committed
 /.phpunit.cache
 /node_modules
 /public/build
@@ -14,6 +15,8 @@ Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
+
+# IDE and editor-specific files
 /.fleet
 /.idea
 /.vscode
