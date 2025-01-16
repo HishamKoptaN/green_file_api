@@ -13,7 +13,6 @@ return new class extends Migration
         $columnNames = config('permission.column_names');
         $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
         $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';
-
         if (empty($tableNames)) {
             throw new \Exception('Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
@@ -30,7 +29,6 @@ return new class extends Migration
                 $table->unique(['name', 'guard_name']);
             },
         );
-
         Schema::create(
             $tableNames['roles'],
             function (Blueprint $table) use ($teams, $columnNames) {
@@ -49,8 +47,6 @@ return new class extends Migration
                 }
             },
         );
-
-
         Schema::create(
             $tableNames['role_has_permissions'],
             function (Blueprint $table) use ($tableNames, $pivotRole, $pivotPermission) {
@@ -70,12 +66,10 @@ return new class extends Migration
                 $table->primary([$pivotPermission, $pivotRole], 'role_has_permissions_permission_id_role_id_primary');
             },
         );
-
         app('cache')
             ->store(config('permission.cache.store') != 'default' ? config('permission.cache.store') : null)
             ->forget(config('permission.cache.key'));
     }
-
     public function down(): void
     {
         $tableNames = config('permission.table_names');
@@ -83,7 +77,6 @@ return new class extends Migration
         if (empty($tableNames)) {
             throw new \Exception('Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
         }
-
         Schema::drop($tableNames['role_has_permissions']);
         Schema::drop($tableNames['roles']);
         Schema::drop($tableNames['permissions']);

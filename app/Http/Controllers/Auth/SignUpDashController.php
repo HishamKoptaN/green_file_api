@@ -46,8 +46,7 @@ class SignUpDashController extends Controller
                     'image' => "default.png",
                     'address' => $request->address,
                     'phone' => $request->phone,
-                    'balance' => 0,
-                    'plan_id' => 1
+
                 ],
             );
             if ($user) {
@@ -84,4 +83,38 @@ class SignUpDashController extends Controller
             );
         }
     }
+    // public function createAccount(Request $request)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|email|unique:users,email',
+    //         'password' => 'required|string|min:6',
+    //     ]);
+
+    //     try {
+    //         // إنشاء حساب مستخدم جديد باستخدام Firebase
+    //         $firebaseUser = $this->firebaseAuth->createUser([
+    //             'email' => $request->input('email'),
+    //             'password' => $request->input('password'),
+    //             'emailVerified' => false,
+    //         ]);
+
+    //         // إضافة المستخدم إلى قاعدة بيانات Laravel
+    //         $user = User::create([
+    //             'email' => $request->input('email'),
+    //             'name' => $request->input('name', 'Guest'),
+    //             'firebase_uid' => $firebaseUser->uid,
+    //         ]);
+
+    //         return response()->json([
+    //             'message' => 'User created successfully',
+    //             'user' => $user,
+    //         ], 201);
+    //     } catch (AuthException $e) {
+    //         Log::error('Firebase Authentication error: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Authentication error'], 500);
+    //     } catch (\Exception $e) {
+    //         Log::error('Unexpected error: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Something went wrong'], 500);
+    //     }
+    // }
 }

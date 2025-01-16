@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\App\DashAppController;
 use App\Http\Controllers\App\BuySellAppController;
 use App\Http\Controllers\App\SupportChatAppController;

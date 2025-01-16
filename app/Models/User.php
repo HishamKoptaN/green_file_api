@@ -19,11 +19,12 @@ class User extends Authenticatable implements JWTSubject
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
     protected $fillable = [
         'status',
+        'email',
         'online_offline',
+        'firebase_uid',
         'first_name',
         'last_name',
         'account_number',
-        'email',
         'password',
         'image',
         'address',

@@ -17,7 +17,6 @@ Route::post(
         'check',
     ],
 );
-
 Route::post(
     '/login',
     [
@@ -30,6 +29,13 @@ Route::post(
     [
         FirebaseAuthController::class,
         'google',
+    ],
+);
+Route::post(
+    'create-account',
+    [
+        FirebaseAuthController::class,
+        'createAccount',
     ],
 );
 Route::post(

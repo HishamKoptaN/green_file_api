@@ -3,68 +3,121 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Kreait\Firebase\Auth as FirebaseAuth;
-use Illuminate\Http\Request;
 use Kreait\Firebase\Exception\AuthException;
 use Kreait\Firebase\Exception\Auth\InvalidIdToken;
-use Exception;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Balance;
+use App\Models\UserPlan;
 
 class FirebaseAuthController extends Controller
 {
     protected $firebaseAuth;
-
-    public function __construct(FirebaseAuth $firebaseAuth)
+    public function __construct()
     {
-        $this->firebaseAuth = $firebaseAuth;
+        $credentialsPath = base_path('storage/firebase/credentials.json');
+        if (!file_exists($credentialsPath)) {
+            throw new \Exception('Firebase credentials file is missing.');
+        }
+        $this->firebaseAuth = (new \Kreait\Firebase\Factory)
+            ->withServiceAccount($credentialsPath)
+            ->createAuth();
     }
 
-    public function google(Request $request)
-    {
-        // التحقق من وجود id_token في الطلب
-        $request->validate([
-            'id_token' => 'required|string',
-        ]);
-
-        try {
-            // التحقق من توكن جوجل
-            $idToken = $request->input('id_token');
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($idToken);
-
-            // الحصول على بيانات المستخدم من جوجل
-            $claims = $verifiedIdToken->claims();
-            $uid = $claims->get('sub'); // معرف المستخدم
-            $email = $claims->get('email'); // البريد الإلكتروني
-            $name = $claims->get('name', 'Guest'); // الاسم الافتراضي إذا لم يكن موجودًا
-
-            // البحث عن المستخدم أو إنشائه إذا لم يكن موجودًا
-            $user = User::firstOrCreate(
-                ['email' => $email],
-                ['name' => $name, 'verified' => true]
+    public function google(
+        Request $request,
+    ) {
+        $idToken = $request->bearerToken();
+        if (!$idToken) {
+            return response()->json(
+                [
+                    'error' => 'id_token is required',
+                ],
+                400,
             );
-
-            // التحقق من تفعيل الحساب
-            if (!$user->verified) {
-                return response()->json(['message' => 'Account not verified'], 403);
+        }
+        try {
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
+                $idToken,
+            );
+            $email = $verifiedIdToken->claims()->get('email');
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+            $fullName = $verifiedIdToken->claims()->get('name');
+            $nameParts = explode(
+                ' ',
+                $fullName,
+            );
+            $firstName = $nameParts[0] ?? 'Guest';
+            $lastName = $nameParts[1] ?? '';
+            $image = $verifiedIdToken->claims()->get('picture');
+            $user = User::firstOrCreate(
+                [
+                    'email' => $email,
+                ],
+                [
+                    'email' => $email,
+                    'firebase_uid' => $firebaseUid,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'password' => Hash::make(
+                        "password",
+                    ),
+                    'account_number' => '24' . rand(
+                        11111,
+                        99999,
+                    ),
+                    'image' =>  $image,
+                    'verified_at' => now(),
+                ]
+            );
+            if ($user) {
+                Balance::create(
+                    [
+                        'user_id' => $user->id,
+                        'available_balance' => 0,
+                    ],
+                );
+                UserPlan::create(
+                    [
+                        'user_id' => $user->id,
+                        'plan_id' => 1,
+                    ],
+                );
+                $token = $user->createToken('Google Login', ['*'], now()->addWeek())->plainTextToken;
+                $user->load(
+                    [
+                        'balance',
+                        'userPlan.plan',
+                    ],
+                );
+                return successResponse(
+                    [
+                        'token' => $token,
+                        'verified' => is_null(
+                            $user->verified_at,
+                        ),
+                        'user' => $user,
+                    ],
+                    201
+                );
             }
-            // إنشاء توكن للمستخدم باستخدام Sanctum
-            $token = $user->createToken('Google Login')->plainTextToken;
-            // إرجاع استجابة تحتوي على التوكن وبيانات المستخدم
-            return response()->json([
-                'token' => $token,
-                'user' => $user,
-            ], 200);
         } catch (InvalidIdToken $e) {
-            // سجل الخطأ وأعد استجابة مفصلة
-            Log::error('Invalid Google ID Token: ' . $e->getMessage());
-            return response()->json(['error' => 'Invalid Google ID Token'], 400);
+            return failureResponse(
+                'Invalid ID token.',
+                401,
+            );
         } catch (AuthException $e) {
-            Log::error('Firebase Authentication error: ' . $e->getMessage());
-            return response()->json(['error' => 'Authentication error'], 500);
-        } catch (Exception $e) {
-            Log::error('Unexpected error in Google login: ' . $e->getMessage());
-            return response()->json(['error' => 'Something went wrong'], 500);
+            return failureResponse(
+                'Authentication error: ' . $e->getMessage(),
+                401,
+            );
+        } catch (\Exception $e) {
+            return failureResponse(
+                'An error occurred: ' . $e->getMessage(),
+            );
         }
     }
 }

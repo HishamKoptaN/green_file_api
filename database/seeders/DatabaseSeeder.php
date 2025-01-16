@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
                 CurrencySeeder::class,
                 AccountsSeeder::class,
                 TransferSeeder::class,
-                SettingSeeder::class,
+                // SettingSeeder::class,
                 ControlsSeeder::class,
                 TasksSeeder::class,
                 TaskProofsSeeder::class,
