@@ -18,18 +18,6 @@ class NotificationsAppController extends Controller
                 return $this->get(
                     $request,
                 );
-            case 'POST':
-                return $this->store(
-                    $request,
-                );
-            case 'PUT':
-                return $this->updateFile(
-                    $request,
-                );
-            case 'DELETE':
-                return $this->deleteFile(
-                    $request,
-                );
             default:
                 return $this->failureResponse();
         }

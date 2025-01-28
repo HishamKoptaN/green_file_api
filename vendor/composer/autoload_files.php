@@ -31,5 +31,4 @@ return array(
     '377b22b161c09ed6e5152de788ca020a' => $vendorDir . '/spatie/laravel-permission/src/helpers.php',
     'd21d43db5f6e840ee7b10744ec7fdf66' => $baseDir . '/app/Helpers/helpers.php',
     '2e5d9b59a861259a5ed93062214ac40e' => $baseDir . '/app/Helpers/api_helpers.php',
-    '4cc599d8b36e02303bb21f4cdbf150f1' => $baseDir . '/app/Helpers/TokenValidator.php',
 );

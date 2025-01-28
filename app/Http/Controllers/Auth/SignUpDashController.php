@@ -11,7 +11,7 @@ use App\Models\UserPlan;
 use Illuminate\Support\Facades\Hash;
 
 class SignUpDashController extends Controller
-{
+{   
     public function signUp(
         Request $request,
     ) {
