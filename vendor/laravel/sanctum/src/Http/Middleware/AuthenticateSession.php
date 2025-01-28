@@ -40,7 +40,7 @@ class AuthenticateSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->hasSession() || !$request->user()) {
+        if (! $request->hasSession() || ! $request->user()) {
             return $next($request);
         }
 
@@ -49,10 +49,10 @@ class AuthenticateSession
             ->filter(fn ($guard) => $guard instanceof SessionGuard);
 
         $shouldLogout = $guards->filter(
-            fn ($guard, $driver) => $request->session()->has('password_hash_' . $driver)
+            fn ($guard, $driver) => $request->session()->has('password_hash_'.$driver)
         )->filter(
-            fn ($guard, $driver) => $request->session()->get('password_hash_' . $driver) !==
-                $request->user()->getAuthPassword()
+            fn ($guard, $driver) => $request->session()->get('password_hash_'.$driver) !==
+                                    $request->user()->getAuthPassword()
         );
 
         if ($shouldLogout->isNotEmpty()) {
@@ -64,7 +64,7 @@ class AuthenticateSession
         }
 
         return tap($next($request), function () use ($request, $guards) {
-            if (!is_null($request->user())) {
+            if (! is_null($request->user())) {
                 $this->storePasswordHashInSession($request, $guards->keys()->first());
             }
         });
@@ -79,7 +79,7 @@ class AuthenticateSession
      */
     protected function storePasswordHashInSession($request, string $guard)
     {
-        if (!$request->user()) {
+        if (! $request->user()) {
             return;
         }
 
