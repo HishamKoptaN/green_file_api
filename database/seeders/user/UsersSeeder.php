@@ -1,0 +1,66 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Company;
+use App\Models\OpportunityLooking;
+use Illuminate\Database\Seeder;
+use App\Models\User;
+
+class UsersSeeder extends Seeder
+{
+    public function run()
+    {
+        $users = [
+            [
+
+                'id' => 1,
+                'userable_id' => 1,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'SGCzShj8BKdAv4Ba7zbPzmE9bgr1',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 2,
+                'userable_id' => 2,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'vg3u9J75ekPpC6q67OcOORdp1rn1',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 3,
+                'userable_id' => 3,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676ZbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 4,
+                'userable_id' => 4,
+                'userable_type' => Company::class,
+                'status' => true,
+                'firebase_uid' => 'MGReFr2p4DZcR9oW51d4eysIl5O2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 5,
+                'userable_id' => 5,
+                'userable_type' => Company::class,
+                'status' => true,
+                'firebase_uid' => 'oskFMJPzWIV7S9Nfxae15M5bqme2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+        ];
+        foreach ($users as $userData) {
+            User::create($userData);
+        }
+    }
+}

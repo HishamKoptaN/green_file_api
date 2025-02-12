@@ -35,7 +35,7 @@ class PermissionsDashController extends Controller
                     $id
                 );
             default:
-                return $this->failureResponse();
+                return $this->failureRes();
         }
     }
 
@@ -44,11 +44,11 @@ class PermissionsDashController extends Controller
     {
         try {
             $permissions = Permission::all();
-            return successResponse(
+            return successRes(
                 $permissions,
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return $this->failureRes(
                 $e->getMessage(),
             );
         }

@@ -8,11 +8,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Permission;
-use App\Traits\ApiResponseTrait;
 
 class UsersDashController extends Controller
 {
-    use ApiResponseTrait;
     public function handleRequest(
         Request $request,
     ) {
@@ -38,7 +36,7 @@ class UsersDashController extends Controller
                     $request,
                 );
             default:
-                return $this->failureResponse();
+                return $this->failureRes();
         }
     }
     protected function get(
@@ -52,11 +50,11 @@ class UsersDashController extends Controller
                     'userPlan',
                 ],
             )->get();
-            return $this->successResponse(
+            return $this->successRes(
                 $users,
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return $this->failureRes(
                 $e->getMessage(),
             );
         }
@@ -99,11 +97,11 @@ class UsersDashController extends Controller
             $userWithRoles = $user->load(
                 'roles.permissions',
             );
-            return $this->successResponse(
+            return $this->successRes(
                 $userWithRoles
             );
         } catch (\Exception $e) {
-            return $this->failureResponse(
+            return $this->failureRes(
                 $e->getMessage(),
             );
         }

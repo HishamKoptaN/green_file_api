@@ -11,29 +11,20 @@ class CheckController extends Controller
     {
         try {
             if (!Auth::guard('sanctum')->check()) {
-                return failureResponse(
-                    [],
-                    401,
+                return response()->json(
+                    ['error' => 'Unauthenticated'],
+                    401
                 );
             }
-            $user = Auth::guard('sanctum')->user()->load(
-                [
-                    'balance',
-                    'userPlan.plan',
-                ],
-            );
-            $isVerified = !is_null(
-                $user->verified_at,
-            );
-            return successResponse(
-                [
-                    'verified' => $isVerified,
-                    'user' => $user,
-                ],
+            $user = Auth::guard('sanctum')->user();
+            return response()->json(
+                ['data' => $user],
+                200
             );
         } catch (\Exception $e) {
-            return failureResponse(
-                $e->getMessage(),
+            return response()->json(
+                ['error' => $e->getMessage()],
+                500
             );
         }
     }

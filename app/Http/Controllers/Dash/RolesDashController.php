@@ -31,7 +31,7 @@ class RolesDashController extends Controller
                     $id
                 );
             default:
-                return failureResponse();
+                return failureRes();
         }
     }
     public function get()
@@ -42,21 +42,21 @@ class RolesDashController extends Controller
                 'sanctum'
             )->user();
             if (!$user) {
-                return failureResponse(
+                return failureRes(
                     'User not authenticated',
                     401,
                 );
             }
             $user_roles = $user->roles;
             $roles = Role::with('permissions')->get();
-            return successResponse(
+            return successRes(
                 [
                     'user_roles' => $user_roles,
                     'roles' => $roles
                 ]
             );
         } catch (\Exception $e) {
-            return failureResponse(
+            return failureRes(
                 $e->getMessage(),
             );
         }
@@ -75,12 +75,12 @@ class RolesDashController extends Controller
                     'name' => $request->name,
                 ],
             );
-            return successResponse(
+            return successRes(
                 $role,
                 201
             );
         } catch (\Exception $e) {
-            return failureResponse(
+            return failureRes(
                 $e->getMessage(),
             );
         }
@@ -103,11 +103,11 @@ class RolesDashController extends Controller
             $role->load(
                 'permissions',
             );
-            return successResponse(
+            return successRes(
                 $role,
             );
         } catch (\Exception $e) {
-            return failureResponse(
+            return failureRes(
                 $e->getMessage(),
             );
         }
@@ -118,9 +118,9 @@ class RolesDashController extends Controller
     ) {
         try {
             $role->delete();
-            return successResponse();
+            return successRes();
         } catch (\Exception $e) {
-            return failureResponse(
+            return failureRes(
                 $e->getMessage(),
             );
         }

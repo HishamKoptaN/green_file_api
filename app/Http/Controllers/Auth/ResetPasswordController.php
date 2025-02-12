@@ -18,7 +18,7 @@ class ResetPasswordController extends Controller
         try {
             $user = User::where('email', $request->email)->first();
             if (!$user) {
-                return failureResponse('User not found.', 404);
+                return failureRes('User not found.', 404);
             }
             $otp = rand(100000, 999999);
             $expiresAt = Carbon::now()->addMinutes(5);
@@ -37,9 +37,9 @@ class ResetPasswordController extends Controller
                     $otp,
                 ),
             );
-            return successResponse();
+            return successRes();
         } catch (\Throwable $th) {
-            return failureResponse(
+            return failureRes(
                 $th->getMessage(),
                 500,
             );
@@ -60,15 +60,15 @@ class ResetPasswordController extends Controller
             $request->otp,
         )->first();
         if (!$otp || $otp->expires_at < now()) {
-            return failureResponse(
+            return failureRes(
                 'Invalid OTP.',
             );
         } else if ($otp->expires_at < now()) {
-            return failureResponse(
+            return failureRes(
                 'expired OTP.',
             );
         } else {
-            return successResponse();
+            return successRes();
         }
     }
     public function resetPassword(
@@ -82,7 +82,7 @@ class ResetPasswordController extends Controller
             ],
         );
         if ($validator->fails()) {
-            return failureResponse(
+            return failureRes(
                 $validator->errors()->first(),
                 422,
             );
@@ -92,12 +92,12 @@ class ResetPasswordController extends Controller
             $request->otp,
         )->first();
         if (!$otp) {
-            return failureResponse(
+            return failureRes(
                 'Invalid OTP.',
             );
         }
         if ($otp->expires_at < now()) {
-            return failureResponse(
+            return failureRes(
                 'Expired OTP.',
             );
         }
@@ -106,7 +106,7 @@ class ResetPasswordController extends Controller
             $otp->user_id,
         )->first();
         if (!$user) {
-            return failureResponse(
+            return failureRes(
                 'User not found.',
                 404,
             );
@@ -123,7 +123,7 @@ class ResetPasswordController extends Controller
             ],
         );
         $token = $user->createToken("auth", ['*'], now()->addWeek());
-        return successResponse(
+        return successRes(
             [
                 'token' => $token->plainTextToken,
                 'user' => $user

@@ -1,5 +1,5 @@
 <?php
-function successResponse($data = null, $code = 200)
+function successRes($data = null, $code = 200)
 {
     return response()->json(
         $data,
@@ -7,7 +7,7 @@ function successResponse($data = null, $code = 200)
     );
 }
 
-function failureResponse(
+function failureRes(
     $errors = null,
     $status = 500,
 ) {

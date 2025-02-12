@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use Kreait\Firebase\Factory;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\OpportunityLooking;
+use App\Models\Company;
+use Exception;
+
+class LoginController extends Controller
+{
+    protected $firebaseAuth;
+    public function __construct()
+    {
+        $credentialsPath = base_path('storage/app/firebase/firebase_credentials.json');
+        if (!file_exists($credentialsPath)) {
+            throw new \Exception('Firebase credentials file is missing.');
+        }
+        $this->firebaseAuth = (new Factory)
+            ->withServiceAccount($credentialsPath)
+            ->createAuth();
+    }
+    public function authToken(Request $request)
+    {
+        $id_token = $request->input('id_token');
+        try {
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
+                $id_token,
+            );
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+            $user = User::where('firebase_uid', $firebaseUid)->first();
+            $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
+
+            return successRes(
+                [
+                    'token' => $token,
+                    'role' => $user->getRoleNames()->first(),
+                ],
+            );
+        } catch (\Exception $e) {
+            return failureRes(
+                $e->getMessage(),
+                401,
+            );
+        }
+    }
+
+    public function check(Request $request)
+    {
+        try {
+            $user = Auth::guard('sanctum')->user();
+            if (!$user) {
+                return failureRes(['message' => 'المستخدم غير موجود', 'code' => 404]);
+            }
+            return successRes(['user' => $user]);
+        } catch (\Exception $e) {
+            return failureRes(['message' => 'التوكن غير صالح', 'code' => 401]);
+        }
+    }
+}
+   // if ($user->hasRole('opportunity_looking')) {
+            //     $data = OpportunityLooking::where('user_id', $user->id)->get();
+            // } elseif ($user->hasRole('company')) {
+            //     $data = Company::where('user_id', $user->id)->get();
+            // } else {
+            //     $data = null;
+            // }
