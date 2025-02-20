@@ -6,12 +6,7 @@ use Kreait\Firebase\Factory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
-use App\Models\OpportunityLooking;
-use App\Models\Company;
-use Exception;
+use App\Models\User\User;
 
 class LoginController extends Controller
 {

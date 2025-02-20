@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Social\Post\Post;
+use App\Models\Course\Course;
+use App\Models\Course\CourseRating;
+use App\Models\Power\Role;
 
 class User extends Authenticatable
 {
@@ -60,23 +64,23 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function userWorkExperiences()
-    {
-        return $this->hasMany(WorkExperience::class);
-    }
-    public function balance()
-    {
-        return $this->hasOne(
-            Balance::class,
-        );
-    }
-    public function account()
-    {
-        return $this->hasOne(
-            Account::class,
-            'user_id',
-        );
-    }
+    // public function userWorkExperiences()
+    // {
+    //     return $this->hasMany(WorkExperience::class);
+    // }
+    // public function balance()
+    // {
+    //     return $this->hasOne(
+    //         Balance::class,
+    //     );
+    // }
+    // public function account()
+    // {
+    //     return $this->hasOne(
+    //         Account::class,
+    //         'user_id',
+    //     );
+    // }
     public function userRoles(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -86,36 +90,36 @@ class User extends Authenticatable
             'role_id',
         );
     }
-    public function sentFriendRequests()
-    {
-        return $this->hasMany(Friend::class, 'user_id')->where('status', 'pending');
-    }
+    // public function sentFriendRequests()
+    // {
+    //     return $this->hasMany(Friend::class, 'user_id')->where('status', 'pending');
+    // }
 
-    public function receivedFriendRequests()
-    {
-        return $this->hasMany(Friend::class, 'friend_id')->where('status', 'pending');
-    }
+    // public function receivedFriendRequests()
+    // {
+    //     return $this->hasMany(Friend::class, 'friend_id')->where('status', 'pending');
+    // }
 
-    public function friends()
-    {
-        return $this->hasMany(Friend::class, 'user_id')->where('status', 'accepted');
-    }
+    // public function friends()
+    // {
+    //     return $this->hasMany(Friend::class, 'user_id')->where('status', 'accepted');
+    // }
 
-    public function notifications()
-    {
-        return $this->belongsToMany(
-            Notification::class,
-            'notification_user',
-            'user_id',
-            'notification_id',
-        );
-    }
-    public function accounts()
-    {
-        return $this->hasMany(
-            Account::class,
-        );
-    }
+    // public function notifications()
+    // {
+    //     return $this->belongsToMany(
+    //         Notification::class,
+    //         'notification_user',
+    //         'user_id',
+    //         'notification_id',
+    //     );
+    // }
+    // public function accounts()
+    // {
+    //     return $this->hasMany(
+    //         Account::class,
+    //     );
+    // }
     public function role()
     {
         return $this->belongsTo(
@@ -140,14 +144,16 @@ class User extends Authenticatable
     }
     public function refer()
     {
-        return $this->belongsTo(User::class, 'refered_by');
+        return $this->belongsTo(User::class, 'refered_by',
+    );
     }
     public function referrals()
     {
-        return $this->hasMany(User::class, 'refered_by');
+        return $this->hasMany(User::class, 'refered_by',
+    );
     }
-    public function userPlan()
-    {
-        return $this->hasOne(UserPlan::class);
-    }
+    // public function userPlan()
+    // {
+    //     return $this->hasOne(UserPlan::class);
+    // }
 }

@@ -1,17 +1,14 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\user;
 
-use App\Models\Company;
 use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\OpportunityLooking;
+use App\Models\User\OpportunityLooking;
 
 class OpportunityLookingSeeder extends Seeder
 {
     public function run()
     {
-
         $base_url = 'https://g.aquan.website/storage/app/profile/opportunity_lookings/';
         $image = ['1.png', '2.png', '3.png'];
         $opportunityLookings = [

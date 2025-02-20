@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\power;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+
 
 class RolesSeeder extends Seeder
 {
@@ -21,8 +21,8 @@ class RolesSeeder extends Seeder
             Role::firstOrCreate(
                 [
                     'name' => $role,
-                    'guard_name' => 'web',
-                ],
+                    'guard_name' => 'api',
+                ]
             );
         }
     }

@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use Kreait\Firebase\Factory;
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Country;
-use App\Models\City;
-use App\Models\OpportunityLooking;
-use App\Models\Role;
-use Exception;
-
+use App\Models\Location\Country;
+use App\Models\Location\City;
+use App\Models\User\OpportunityLooking;
+use App\Models\User\User;
+use App\Models\User\Company;
 class SignUpController extends Controller
 {
     protected $firebaseAuth;

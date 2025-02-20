@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Database\Factories\user\CompanyFactory;
+use App\Models\User\User;
+
 
 class Company extends Model
 {
@@ -33,5 +36,9 @@ class Company extends Model
             'user_id',
         )
             ->withTimestamps();
+    }
+    protected static function newFactory()
+    {
+        return CompanyFactory::new();
     }
 }

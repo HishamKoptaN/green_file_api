@@ -20,6 +20,7 @@ return [
     ],
     'providers' => [
         Laravel\Sanctum\SanctumServiceProvider::class,
+        Laravel\Tinker\TinkerServiceProvider::class,
         Kreait\Laravel\Firebase\ServiceProvider::class,
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,

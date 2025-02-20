@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Job\obSpecialization;
 
-class JobSpecializationController extends Controller
-{
-    //
-}
+class JobSpecializationController extends Controller {}

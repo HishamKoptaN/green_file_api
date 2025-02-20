@@ -14,10 +14,11 @@ return new class extends Migration
             function (Blueprint $table) {
                 $table->id();
                 $table->boolean('status')->default(true)->comment('true-false');
+                $table->foreignId("company_id")->constrained('companies')->cascadeOnDelete();
                 $table->string('title');
                 $table->text('description');
                 $table->string('job_type');
-                $table->decimal('min salary', 10, 2);
+                $table->decimal('min_salary', 10, 2);
                 $table->decimal('max_salary', 10, 2);
                 $table->string('currency');
                 $table->integer('applicants_count')->default(0);

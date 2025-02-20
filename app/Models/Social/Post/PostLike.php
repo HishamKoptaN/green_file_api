@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Social\Post;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Database\Factories\social\post\PostFactory;
+
+use App\Models\User\User;
 
 class PostLike extends Model
 {
@@ -20,5 +23,10 @@ class PostLike extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
+    }
+
+    protected static function newFactory()
+    {
+        return PostFactory::new();
     }
 }

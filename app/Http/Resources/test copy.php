@@ -17,17 +17,4 @@ class PostResource extends JsonResource
             'created_at' => $this->created_at->toDateTimeString(),
         ];
     }
-    private function getPostOwnerDetails()
-    {
-        $owner = optional($this->user)->userable;
-
-        if (!$owner) {
-            return null;
-        }
-        return [
-            'type' => $owner->getMorphClass(),
-            'name' => $owner instanceof \App\Models\Company ? $owner->name : $owner->first_name . ' ' . $owner->last_name,
-            'image' => $owner->image,
-        ];
-    }
 }

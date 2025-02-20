@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Social\Post;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\User;
 
 class PostComment extends Model
 {
@@ -24,5 +25,9 @@ class PostComment extends Model
         return $this->belongsTo(
             User::class,
         );
+    }
+    protected static function newFactory()
+    {
+        return \Database\Factories\Social\Post\PostCommentFactory::new();
     }
 }

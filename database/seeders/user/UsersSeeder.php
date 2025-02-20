@@ -1,11 +1,11 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\user;
 
-use App\Models\Company;
-use App\Models\OpportunityLooking;
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\User\OpportunityLooking;
+use App\Models\User\Company;
+use App\Models\User\User;
 
 class UsersSeeder extends Seeder
 {

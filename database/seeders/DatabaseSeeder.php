@@ -3,23 +3,40 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\File;
+use Database\Seeders\location\CountriesSeeder;
+use Database\Seeders\location\CitiesSeeder;
+use Database\Seeders\power\RolesSeeder;
+use Database\Seeders\user\UsersSeeder;
+use Database\Seeders\power\UserRoleSeeder;
+use Database\Seeders\social\post\PostSeeder;
+use Database\Seeders\social\statuses\StatusSeeder;
+use Database\Seeders\user\OpportunityLookingSeeder;
+use Database\Seeders\user\CompanySeeder;
+use Database\Seeders\job\SkillSeeder;
+use Database\Seeders\job\JobSeeder;
+use Database\Seeders\job\JobSkillSeeder;
+use Database\Seeders\job\JobSpecializationSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // الحصول على كل ملفات Seeder داخل `database/seeders`
-        $files = File::allFiles(database_path('seeders'));
-
-        foreach ($files as $file) {
-            // الحصول على اسم الـ Seeder بدون الامتداد
-            $seeder = pathinfo($file, PATHINFO_FILENAME);
-
-            // استثناء `DatabaseSeeder` نفسه حتى لا يتم استدعاؤه مرة أخرى
-            if ($seeder !== 'DatabaseSeeder') {
-                $this->call($seeder);
-            }
-        }
+        $this->call(
+            [
+                CountriesSeeder::class,
+                CitiesSeeder::class,
+                RolesSeeder::class,
+                UsersSeeder::class,
+                UserRoleSeeder::class,
+                PostSeeder::class,
+                StatusSeeder::class,
+                OpportunityLookingSeeder::class,
+                CompanySeeder::class,
+                JobSpecializationSeeder::class,
+                SkillSeeder::class,
+                JobSeeder::class,
+                JobSkillSeeder::class,
+            ],
+        );
     }
 }

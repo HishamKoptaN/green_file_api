@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\StatusesApiController;
 use App\Http\Controllers\Api\PostsApiController;
 use App\Http\Controllers\Api\PostCmntsApiController;
 use App\Http\Controllers\Api\JobsApiController;
+use App\Http\Controllers\Api\BusinessFile\NewsApiController;
 
 Route::any(
     '/statuses',
@@ -34,7 +35,13 @@ Route::any(
         'handleReq',
     ],
 );
-
+Route::any(
+    '/news/{id?}',
+    [
+        NewsApiController::class,
+        'handleReq',
+    ],
+);
 Route::middleware('auth:sanctum')->group(
     function () {
         //         Route::any(

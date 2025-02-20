@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Database\Factories\user\OpportunityLookingFactory;
+use App\Models\User\User;
 
 class OpportunityLooking extends Model
 {
@@ -39,5 +41,11 @@ class OpportunityLooking extends Model
             User::class,
             'userable',
         );
+    }
+
+
+    protected static function newFactory()
+    {
+        return OpportunityLookingFactory::new();
     }
 }

@@ -24,6 +24,7 @@ class MigrateAll extends Command
             'database/migrations/projects',
             'database/migrations/social/statuses',
             'database/migrations/social/posts',
+            'database/migrations/businessFile',
         ];
 
         foreach ($folders as $folder) {
