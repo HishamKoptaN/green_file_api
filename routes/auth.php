@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\CheckController;
+use App\Http\Controllers\Api\OpportunityLookingController;
 
 Route::post(
     '/auth-token',
@@ -27,28 +28,19 @@ Route::post(
     ],
 );
 Route::get(
-    '/countries',
+    'opportunity-lookings/search',
     [
-        SignUpController::class,
-        'countries',
+        OpportunityLookingController::class,
+        'search',
     ],
 );
-Route::post(
-    '/job-seeker-sign-up',
+Route::any(
+    '/sign-up',
     [
         SignUpController::class,
-        'jobSeekerSignUp',
+        'handleReq',
     ],
 );
-Route::post(
-    '/company-sign-up',
-    [
-        SignUpController::class,
-        'companySignUp',
-    ],
-);
-
-
 // اختبار
 Route::get(
     '/test',

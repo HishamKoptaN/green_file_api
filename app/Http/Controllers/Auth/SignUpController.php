@@ -10,6 +10,8 @@ use App\Models\Location\City;
 use App\Models\User\OpportunityLooking;
 use App\Models\User\User;
 use App\Models\User\Company;
+use App\Http\Resources\Auth\SignUpResource;
+
 class SignUpController extends Controller
 {
     protected $firebaseAuth;
@@ -23,16 +25,38 @@ class SignUpController extends Controller
             ->withServiceAccount($credentialsPath)
             ->createAuth();
     }
-    public function countries()
+    public function handleReq(
+        Request $request,
+        $id = null,
+    ) {
+        switch ($request->method()) {
+
+            case 'GET':
+                return $this->get(
+                    $id,
+                );
+            case 'POST':
+                return $this->signUp(
+                    $request,
+                );
+            default:
+                return response()->json(['error' => 'Method Not Allowed'], 405);
+        }
+    }
+    public function get()
     {
         try {
             $countries = Country::all();
             $cities = City::all();
+            $opportunityLookings = OpportunityLooking::all();
             return successRes(
                 [
                     "countries" => $countries,
                     "cities" => $cities,
-                ]
+                    "opportunity_lookings" => SignUpResource::collection(
+                        $opportunityLookings,
+                    ),
+                ],
             );
         } catch (\Exception $e) {
             return failureRes(
@@ -43,47 +67,51 @@ class SignUpController extends Controller
             );
         }
     }
-    public function jobSeekerSignUp(
-        Request $request,
-    ) {
+    public function signUp(Request $request)
+    {
         try {
             $id_token = $request->input('id_token');
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
-                $id_token,
-            );
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($id_token);
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
-            $user = User::create(
-                [
-                    'firebase_uid' => $firebaseUid,
-                ],
-            );
-            $user->assignRole('opportunity_looking');
+            if ($request->userable_type === 'company') {
+                return $this->companySignUp($request, $firebaseUid);
+            } elseif ($request->userable_type === 'opportunity_looking') {
+                return $this->jobSeekerSignUp($request, $firebaseUid);
+            }
+            return failureRes("نوع المستخدم غير صالح.");
+        } catch (\Exception $e) {
+            return failureRes($e->getMessage());
+        }
+    }
+    public function jobSeekerSignUp(
+        Request $request,
+        $firebaseUid,
+
+    ) {
+        try {
             $opportunityLooking = OpportunityLooking::create(
                 [
-                    'user_id' => $user->id,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'phone' => $request->phone,
                     'image' => "default.png",
                 ],
             );
-            // PrivacySetting::create([
-            //     'user_id' => $user->id,
-            //     'post_visibility' => 'friends',
-            //     'message_privacy' => 'everyone',
-            //     'friend_request_privacy' => 'everyone',
-            //     'show_last_seen' => true,
-            //     'show_phone_number' => false,
-            // ]);
-            $user->tokens()->create(
+            $user = User::create(
                 [
-                    'name' => 'auth-token',
-                    'token' => hash('sha256', $id_token),
+                    'firebase_uid' => $firebaseUid,
+                    'userable_id' => $opportunityLooking->id,
+                    'userable_type' => OpportunityLooking::class,
                 ],
             );
-
+            $user->assignRole('opportunity_looking');
+            $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
             return successRes(
-                $opportunityLooking,
+                [
+                    'token' => $token,
+                    'role' => $user->getRoleNames()->first(),
+                    'user' =>  $opportunityLooking,
+                ],
             );
         } catch (\Exception $e) {
             return failureRes(
@@ -93,22 +121,11 @@ class SignUpController extends Controller
     }
     public function companySignUp(
         Request $request,
+        $firebaseUid,
     ) {
         try {
-            $id_token = $request->input('id_token');
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
-                $id_token,
-            );
-            $firebaseUid = $verifiedIdToken->claims()->get('sub');
-            $user = User::create(
-                [
-                    'firebase_uid' => $firebaseUid,
-                ],
-            );
             $company = Company::create(
                 [
-                    'user_id' => $user->id,
-                    'firebase_uid' => $firebaseUid,
                     'name' => $request->name,
                     'phone' => $request->phone,
                     'country_id' => $request->country_id,
@@ -117,29 +134,26 @@ class SignUpController extends Controller
 
                 ],
             );
+            $user = User::create(
+                [
+                    'firebase_uid' => $firebaseUid,
+                    'userable_id' => $company->id,
+                    'userable_type' => Company::class,
+                ],
+            );
             $user->assignRole('company');
+            $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
             return successRes(
-                $company,
+                [
+                    'token' => $token,
+                    'role' => $user->getRoleNames()->first(),
+                    'user' =>  $company,
+                ],
             );
         } catch (\Exception $e) {
             return failureRes(
                 $e->getMessage(),
             );
         }
-    }
-    public function assignRoleToUser()
-    {
-
-        // العثور على المستخدم بناءً على الـ ID
-        $user = User::find(1);
-
-        if (!$user) {
-            return "المستخدم غير موجود.";
-        }
-
-        // تعيين الدور للمستخدم
-        $user->assignRole('opportunity_looking');
-
-        return "تم تعيين الدور  للمستخدم بنجاح.";
     }
 }

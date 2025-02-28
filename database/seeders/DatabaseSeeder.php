@@ -16,7 +16,12 @@ use Database\Seeders\job\SkillSeeder;
 use Database\Seeders\job\JobSeeder;
 use Database\Seeders\job\JobSkillSeeder;
 use Database\Seeders\job\JobSpecializationSeeder;
+use Database\Seeders\businessFile\opinionPolls\OpinionPollSeeder;
+use Database\Seeders\businessFile\opinionPolls\OpinionPollOptionSeeder;
+use Database\Seeders\businessFile\opinionPolls\OpinionPollResponseSeeder
 
+
+;
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -33,6 +38,9 @@ class DatabaseSeeder extends Seeder
                 OpportunityLookingSeeder::class,
                 CompanySeeder::class,
                 JobSpecializationSeeder::class,
+                OpinionPollSeeder::class,
+                OpinionPollOptionSeeder::class,
+                OpinionPollResponseSeeder::class,
                 SkillSeeder::class,
                 JobSeeder::class,
                 JobSkillSeeder::class,

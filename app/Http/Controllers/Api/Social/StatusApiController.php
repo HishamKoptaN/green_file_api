@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
-
+namespace App\Http\Controllers\Api\Social;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\Social\Status\StatusCollection;
 use App\Models\Social\Status\Status;

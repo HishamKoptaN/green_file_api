@@ -34,7 +34,8 @@
         },
         "files": [
             "app/Helpers/helpers.php",
-            "app/Helpers/api_helpers.php"
+            "app/Helpers/api_helpers.php",
+            "app/Helpers/pagination_helper.php"
         ]
     },
     "autoload-dev": {

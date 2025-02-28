@@ -15,6 +15,7 @@ class Post extends Model
         'content',
         'image_url',
         'video_url',
+        'original_post_id',
     ];
     public function user()
     {
@@ -24,16 +25,26 @@ class Post extends Model
     }
     public function comments()
     {
-        return $this->hasMany(
-            PostComment::class,
+        return $this->morphMany(
+            Comment::class,
+            'commentable',
         );
     }
     public function likes()
     {
-        return $this->hasMany(
-            PostLike::class,
+        return $this->morphMany(
+            Like::class,
+            'likeable',
         );
     }
+    public function originalPost()
+    {
+        return $this->belongsTo(
+            Post::class,
+            'original_post_id',
+        );
+    }
+
     protected static function newFactory()
     {
         return PostFactory::new();

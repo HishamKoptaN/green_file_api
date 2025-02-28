@@ -20,22 +20,22 @@ class SettingsAppController extends Controller
                 return $this->failureRes();
         }
     }
-    public function handleSettings(Request $request)
-    {
-        if ($request->setting_name) {
+    // public function handleSettings(Request $request)
+    // {
+    //     if ($request->setting_name) {
 
-            $setting = Setting::where('name', $request->setting_name)->first();
-            return [
-                'status' => true,
-                'content' => $setting?->content
-            ];
-        }
+    //         $setting = Setting::where('name', $request->setting_name)->first();
+    //         return [
+    //             'status' => true,
+    //             'content' => $setting?->content
+    //         ];
+    //     }
 
-        $settings = Setting::get()->pluck('content', 'name')->toArray();
+    //     $settings = Setting::get()->pluck('content', 'name')->toArray();
 
-        return [
-            'status' => true,
-            'settings' => $settings
-        ];
-    }
+    //     return [
+    //         'status' => true,
+    //         'settings' => $settings
+    //     ];
+    // }
 }

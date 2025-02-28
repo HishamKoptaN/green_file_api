@@ -1,14 +1,13 @@
 <?php
 
-namespace Database\Seeders\social\post;
+namespace Database\Seeders\Social\Post;
 
 use Illuminate\Database\Seeder;
 use App\Models\Social\Post\Post;
-
 class PostSeeder extends Seeder
 {
     public function run()
     {
-        Post::factory(15)->create();
+        Post::factory(50)->create();
     }
 }

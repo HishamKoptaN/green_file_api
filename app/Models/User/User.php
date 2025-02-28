@@ -13,19 +13,23 @@ use App\Models\Social\Post\Post;
 use App\Models\Course\Course;
 use App\Models\Course\CourseRating;
 use App\Models\Power\Role;
-
+use App\Models\Social\Follower;
+use App\Models\Social\Friendship;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
     protected $fillable = [
         'status',
-        'online_offline',
         'firebase_uid',
+        'userable_id',
+        'userable_type',
+        'online_offline',
         'verified_at',
     ];
     protected $casts = [
         'status' => 'boolean',
     ];
+
     public function userable()
     {
         return $this->morphTo();
@@ -42,6 +46,81 @@ class User extends Authenticatable
     {
         return $this->hasMany(Company::class);
     }
+    // ! Frindships
+    public function followers()
+    {
+        return $this->hasMany(Friendship::class, 'friend_id')
+                    ->where('status', 'accepted');
+    }
+    public function followings()
+    {
+        return $this->hasMany(Friendship::class, 'user_id')
+                    ->where('status', 'accepted');
+    }
+    public function isFollowing($user)
+    {
+        return $this->followings()
+                    ->where('friend_id', $user->id)
+                    ->exists();
+    }
+    public function isFollowedBy($user)
+    {
+        return $this->followers()
+                    ->where('user_id', $user->id)
+                    ->exists();
+    }
+    public function sentFriendRequests()
+    {
+        return $this->hasMany(Friendship::class, 'user_id')->where('status', 'pending');
+    }
+
+    public function receivedFriendRequests()
+    {
+        return $this->hasMany(Friendship::class, 'friend_id')->where('status', 'pending');
+    }
+
+    public function friends()
+    {
+        return $this->hasMany(Friendship::class, 'user_id')->where('status', 'accepted')
+            ->orWhere(function ($q) {
+                $q->where('friend_id', $this->id)->where('status', 'accepted');
+            });
+    }
+    public function sendFriendRequest(User $user)
+    {
+        return $this->sentFriendRequests()->create([
+            'friend_id' => $user->id,
+            'status' => 'pending',
+        ]);
+    }
+    public function acceptFriendRequest(User $user)
+    {
+        return $this->receivedFriendRequests()
+            ->where('user_id', $user->id)
+            ->update(['status' => 'accepted']);
+    }
+
+    public function rejectFriendRequest(User $user)
+    {
+        return $this->receivedFriendRequests()
+            ->where('user_id', $user->id)
+            ->update(['status' => 'rejected']);
+    }
+    public function isFriendWith(User $user)
+    {
+        return $this->friends()
+            ->where(function ($query) use ($user) {
+                $query->where('friend_id', $user->id)
+                    ->orWhere('user_id', $user->id);
+            })->exists();
+    }
+    // ! Followers
+    public function following()
+    {
+        return $this->hasMany(Follower::class, 'follower_id');
+    }
+
+
     public function courses()
     {
         return $this->belongsToMany(Course::class);
@@ -50,37 +129,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(CourseRating::class);
     }
-    public function following()
-    {
-        return $this->morphToMany(self::class, 'followable', 'followers', 'user_id', 'followable_id')
-            ->withPivot('created_at')
-            ->withTimestamps();
-    }
 
-    public function followers()
-    {
-        return $this->morphToMany(self::class, 'followable', 'followers', 'followable_id', 'user_id')
-            ->withPivot('created_at')
-            ->withTimestamps();
-    }
 
-    // public function userWorkExperiences()
-    // {
-    //     return $this->hasMany(WorkExperience::class);
-    // }
-    // public function balance()
-    // {
-    //     return $this->hasOne(
-    //         Balance::class,
-    //     );
-    // }
-    // public function account()
-    // {
-    //     return $this->hasOne(
-    //         Account::class,
-    //         'user_id',
-    //     );
-    // }
     public function userRoles(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -90,36 +140,21 @@ class User extends Authenticatable
             'role_id',
         );
     }
-    // public function sentFriendRequests()
-    // {
-    //     return $this->hasMany(Friend::class, 'user_id')->where('status', 'pending');
-    // }
+    public function follow($userId)
+    {
+        if (!$this->isFollowing($userId)) {
+            return $this->following()->create(['followed_id' => $userId]);
+        }
+        return false;
+    }
 
-    // public function receivedFriendRequests()
-    // {
-    //     return $this->hasMany(Friend::class, 'friend_id')->where('status', 'pending');
-    // }
+    public function unfollow($userId)
+    {
+        return $this->following()->where('followed_id', $userId)->delete();
+    }
 
-    // public function friends()
-    // {
-    //     return $this->hasMany(Friend::class, 'user_id')->where('status', 'accepted');
-    // }
 
-    // public function notifications()
-    // {
-    //     return $this->belongsToMany(
-    //         Notification::class,
-    //         'notification_user',
-    //         'user_id',
-    //         'notification_id',
-    //     );
-    // }
-    // public function accounts()
-    // {
-    //     return $this->hasMany(
-    //         Account::class,
-    //     );
-    // }
+
     public function role()
     {
         return $this->belongsTo(
@@ -144,16 +179,16 @@ class User extends Authenticatable
     }
     public function refer()
     {
-        return $this->belongsTo(User::class, 'refered_by',
-    );
+        return $this->belongsTo(
+            User::class,
+            'refered_by',
+        );
     }
     public function referrals()
     {
-        return $this->hasMany(User::class, 'refered_by',
-    );
+        return $this->hasMany(
+            User::class,
+            'refered_by',
+        );
     }
-    // public function userPlan()
-    // {
-    //     return $this->hasOne(UserPlan::class);
-    // }
 }

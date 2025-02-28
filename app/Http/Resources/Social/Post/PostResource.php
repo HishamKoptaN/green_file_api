@@ -16,16 +16,18 @@ class PostResource extends JsonResource
             'image_url' => $this->image_url,
             'video_url' => $this->video_url,
             'post_owner' => $this->getPostOwnerDetails(),
+            'original_post' => $this->getOriginalPostDetails(),
             'likes_count' => $this->likes()->count(),
             'isLike' => $this->isLikedByUser(),
+            'likes_count' => $this->likes()->count(),
             'comments_count' => $this->comments()->count(),
             'created_at' => $this->created_at->diffForHumans(),
         ];
     }
+
     private function getPostOwnerDetails()
     {
         $owner = optional($this->user)->userable;
-
         if (!$owner) {
             return null;
         }
@@ -35,13 +37,36 @@ class PostResource extends JsonResource
             'image' => $owner->image,
         ];
     }
+    private function getOriginalPostDetails()
+    {
+        if (!$this->original_post_id) {
+            return null;
+        }
+        $originalPost = $this->originalPost;
+
+        if (!$originalPost) {
+            return null;
+        }
+        $owner = optional($originalPost->user)->userable;
+        return [
+            'id' => $originalPost->id,
+            'content' => $originalPost->content,
+            'image_url' => $originalPost->image_url,
+            'video_url' => $originalPost->video_url,
+            'created_at' => $originalPost->created_at->diffForHumans(),
+            'post_owner' => $owner ? [
+                'type' => $owner->getMorphClass(),
+                'name' => $owner instanceof Company ? $owner->name : $owner->first_name . ' ' . $owner->last_name,
+                'image' => $owner->image,
+            ] : null,
+        ];
+    }
     private function isLikedByUser()
     {
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return false;
         }
-
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 }

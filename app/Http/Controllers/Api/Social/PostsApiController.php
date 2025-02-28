@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Social;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Resources\Social\Post\PostResource;
-use App\Http\Resources\Social\Post\PostCollection;
 use App\Models\Social\Post\Post;
-use App\Models\Social\Post\PostLike;
 
 class PostsApiController extends Controller
 {
@@ -27,10 +26,9 @@ class PostsApiController extends Controller
                         $request,
                     );
                 }
-
             case 'POST':
                 if ($id) {
-                    return $this->comment(
+                    return $this->sharePost(
                         $request,
                         $id,
                     );
@@ -39,7 +37,6 @@ class PostsApiController extends Controller
                         $request,
                     );
                 }
-
             case 'PUT':
                 return $this->toggleLike(
                     $id,
@@ -51,11 +48,13 @@ class PostsApiController extends Controller
     public function get()
     {
         try {
-            $posts = Post::with('user')->paginate(10);;
+            $posts = Post::orderBy('created_at', 'desc')->with('user')->paginate(10);;
             return successRes(
-                new PostCollection(
+                paginateRes(
                     $posts,
-                ),
+                    PostResource::class,
+                    'posts',
+                )
             );
         } catch (\Exception $e) {
             return failureRes(
@@ -67,11 +66,11 @@ class PostsApiController extends Controller
         Request $request,
     ) {
         try {
-            $user = Auth::guard('sanctum')->user();
             $post = Post::create(
                 [
-                    'user_id' => $user->id,
+                    'user_id' => auth()->id(),
                     'content' => $request->content,
+                    'original_post_id' =>$request->original_post_id,
                 ],
             );
             return successRes(
@@ -83,34 +82,6 @@ class PostsApiController extends Controller
             return failureRes(
                 $e->getMessage(),
             );
-        }
-    }
-
-    public function toggleLike(
-        $postId,
-    ) {
-        try {
-            $user = Auth::guard('sanctum')->user();
-            $post = Post::where('id', $postId)->first();
-
-            if (!$post) {
-                return failureRes("Post not found");
-            }
-            $like = PostLike::where('user_id', $user->id)->where('post_id', $postId)->first();
-            if ($like) {
-                $like->delete();
-                return successRes();
-            } else {
-                PostLike::create(
-                    [
-                        'user_id' => $user->id,
-                        'post_id' => $postId
-                    ],
-                );
-                return successRes();
-            }
-        } catch (\Exception $e) {
-            return failureRes($e->getMessage());
         }
     }
     public function destroy(

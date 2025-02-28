@@ -1,13 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Api\BusinessFile;
+
 use App\Http\Controllers\Controller;
-use App\Http\Resources\BusinessFile\News\NewsCollection;
-use App\Http\Resources\BusinessFile\News\NewsResource;
+use App\Http\Resources\BusinessFile\NewsResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\BusinessFile\News;
-
 class NewsApiController extends Controller
 {
     public function handleReq(
@@ -24,14 +23,17 @@ class NewsApiController extends Controller
             default:
                 return failureRes();
         }
-    } public function get()
+    }
+    public function get()
     {
         try {
-            $jobs = News::with('company')->paginate(10);;
+            $news = News::with('company')->paginate(10);
             return successRes(
-                new  NewsCollection(
-                    $jobs,
-                ),
+                paginateRes(
+                    $news,
+                     NewsResource::class,
+                    'news',
+                )
             );
         } catch (\Exception $e) {
             return failureRes(
@@ -39,7 +41,9 @@ class NewsApiController extends Controller
             );
         }
     }
-    public function create(Request $request)
+    public function create(
+        Request $request,
+    )
     {
         try {
             $user = Auth::guard('sanctum')->user();

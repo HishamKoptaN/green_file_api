@@ -19,6 +19,7 @@ class Company extends Model
         'country_id',
         'city_id',
     ];
+
     public function user()
     {
         return $this->morphOne(

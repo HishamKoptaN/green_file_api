@@ -12,7 +12,6 @@ return [
     'timezone' => 'Europe/Istanbul',
     'locale' => 'en',
     'fallback_locale' => 'en',
-    'faker_locale' => 'en_US',
     'key' => env('APP_KEY'),
     'cipher' => 'AES-256-CBC',
     'maintenance' => [
@@ -49,7 +48,6 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
     ],
-
     'aliases' => Facade::defaultAliases()->merge([
         'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
     ])->toArray(),
