@@ -18,8 +18,9 @@ class Company extends Model
         'phone',
         'country_id',
         'city_id',
-    ];
+             'created_at',
 
+    ];
     public function user()
     {
         return $this->morphOne(

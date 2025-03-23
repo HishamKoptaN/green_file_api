@@ -15,19 +15,23 @@ class ProjectFactory extends Factory
                 1,
                 5,
             ),
-            'title' => $this->faker->randomElement([
-                'برمجة',
-                'اوتو كاد',
-                'تسويق',
-                'موشن جرافيك',
-                'جرافيك',
-                'ادارة',
-            ]),
-            'image' => $this->faker->randomElement([
-                'https://g.aquan.website/storage/app/projects/1.png',
-                'https://g.aquan.website/storage/app/projects/2.png',
-                'https://g.aquan.website/storage/app/projects/3.png',
-            ]),
+            'title' => $this->faker->randomElement(
+                [
+                    'برمجة',
+                    'اوتو كاد',
+                    'تسويق',
+                    'موشن جرافيك',
+                    'جرافيك',
+                    'ادارة',
+                ],
+            ),
+            'image' => $this->faker->randomElement(
+                [
+                    env('APP_URL') . '/public/media/projects/1.png',
+                    env('APP_URL') . '/public/media/projects/2.png',
+                    env('APP_URL') . '/public/media/projects/3.png',
+                ],
+            ),
             'description' => $this->faker->paragraph,
             'specialization_id' => $this->faker->numberBetween(
                 1,

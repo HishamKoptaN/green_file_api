@@ -1,76 +1,114 @@
 <?php
 
 namespace App\Http\Controllers\Api\Social;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Resources\Social\FollowerResource;
+use App\Notifications\NewFollowerNotification;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User\User;
 use App\Models\User\Company;
 
 class FollowerApiController extends Controller
 {
-    public function handleRequest(
+    public function followers(Request $request)
+    {
+        $user = $this->getUserFromRequest(
+            $request,
+        );
+        $followers = $user->followers()->paginate(10);
+        return successRes(
+            paginateRes(
+                $followers,
+                FollowerResource::class,
+                'followers'
+            )
+        );
+    }
+
+    public function followings(
         Request $request,
     ) {
-        switch ($request->method()) {
-            case 'GET':
-                return $this->get(
-                    $request,
-                );
-            default:
-                return $this->failureRes();
-        }
+        $user = $this->getUserFromRequest(
+            $request,
+        );
+
+        $followings = $user->followings()->paginate(10);
+        return successRes(
+            paginateRes(
+                $followings,
+                FollowerResource::class,
+                'followings'
+            )
+        );
     }
-    public function follow(
+    public function toggleFollow(
+        $id,
+    ) {
+        $authUser = Auth::user();
+        $targetUser = User::findOrFail(
+            $id,
+        );
+
+        $isFollowing = $authUser->followings()->where('followed_id', $targetUser->id)->exists();
+
+        if ($isFollowing) {
+            $authUser->followings()->detach($targetUser->id);
+            $message = 'تم إلغاء المتابعة';
+        } else {
+            $authUser->followings()->attach($targetUser->id);
+            $message = 'تمت المتابعة';
+            $targetUser->notify(
+                new NewFollowerNotification(
+                    $authUser,
+                ),
+            );
+        }
+
+        return response()->json(['message' => $message]);
+    }
+
+    public function suggested(Request $request)
+    {
+        $authUser = $request->user();
+
+        $companies = User::where(
+            'userable_type',
+            Company::class,
+        )
+            ->whereDoesntHave('followers', function ($query) use ($authUser) {
+                $query->where('follower_id', $authUser->id);
+            })
+            ->with('userable')
+            ->get();
+
+        return response()->json(
+            $companies->map(
+                function ($company) {
+                    $companyData = $company->userable;
+                    return [
+                        'id' => $company->id,
+                        'type' => 'Company',
+                        'name' => $companyData?->name ?? 'اسم غير متوفر',
+                        'image' => $companyData->image ?? '',
+                    ];
+                },
+            )
+        );
+    }
+    private function getUserFromRequest(
         Request $request,
     ) {
-        $user = auth()->user();
-        $followableType = $request->input('followable_type');
-        $followableId = $request->input('followable_id');
-
-        if ($followableType === 'user') {
-            $followable = User::findOrFail($followableId);
-        } elseif ($followableType === 'company') {
-            $followable = Company::findOrFail($followableId);
-        } else {
-            return response()->json(['error' => 'Invalid followable type'], 400);
-        }
-        $user->following()->attach($followable);
-
-        return response()->json(['message' => 'Followed successfully']);
-    }
-    public function unfollow(Request $request)
-    {
-        $user = auth()->user();
-        $followableType = $request->input('followable_type');
-        $followableId = $request->input('followable_id');
-
-        if ($followableType === 'user') {
-            $followable = User::findOrFail($followableId);
-        } elseif ($followableType === 'company') {
-            $followable = Company::findOrFail($followableId);
-        } else {
-            return response()->json(['error' => 'Invalid followable type'], 400);
-        }
-        $user->following()->detach($followable);
-
-        return response()->json(['message' => 'Unfollowed successfully']);
-    }
-    public function followers($id, $type)
-    {
-        if ($type === 'user') {
-            $followable = User::findOrFail($id);
-        } elseif ($type === 'company') {
-            $followable = Company::findOrFail($id);
-        } else {
-            return response()->json(['error' => 'Invalid type'], 400);
+        if (filter_var(
+            $request->my_data,
+            FILTER_VALIDATE_BOOLEAN,
+        )) {
+            return Auth::user();
         }
 
-        return response()->json($followable->followers);
-    }
-    public function following()
-    {
-        $user = auth()->user();
-        return response()->json($user->following);
+        return $request->user_id ? User::findOrFail(
+            $request->user_id,
+        ) : Auth::user();
     }
 }

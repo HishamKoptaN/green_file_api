@@ -13,54 +13,65 @@ class PostResource extends JsonResource
         return [
             'id' => $this->id,
             'content' => $this->content,
-            'image_url' => $this->image_url,
-            'video_url' => $this->video_url,
-            'post_owner' => $this->getPostOwnerDetails(),
+            'image' => $this->image,
+            'video' => $this->video,
+            'post_owner' => $this->getPostOwnerDetails($this->user),
             'original_post' => $this->getOriginalPostDetails(),
             'likes_count' => $this->likes()->count(),
             'isLike' => $this->isLikedByUser(),
-            'likes_count' => $this->likes()->count(),
             'comments_count' => $this->comments()->count(),
+            'type' => $this->type,
             'created_at' => $this->created_at->diffForHumans(),
         ];
     }
 
-    private function getPostOwnerDetails()
+    private function getPostOwnerDetails($user)
     {
-        $owner = optional($this->user)->userable;
-        if (!$owner) {
-            return null;
+        if (!$user || !$user->userable) {
+            return [
+                'id' => null,
+                'type' => 'Unknown',
+                'name' => 'Anonymous',
+                'image' => null,
+                'is_following' => false,
+            ];
         }
+
+        $owner = $user->userable;
+        $authUser = Auth::guard('sanctum')->user();
+        $isFollowing = $authUser ? $authUser->following()->where('followed_id', $user->id)->exists() : false;
+
         return [
+            'id' => $owner->id,
             'type' => $owner->getMorphClass(),
-            'name' => $owner instanceof Company ? $owner->name : $owner->first_name . ' ' . $owner->last_name,
+            'name' => $owner instanceof Company ? $owner->name : "{$owner->first_name} {$owner->last_name}",
             'image' => $owner->image,
+            'is_following' => $isFollowing,
         ];
     }
+
     private function getOriginalPostDetails()
     {
         if (!$this->original_post_id) {
             return null;
         }
+
         $originalPost = $this->originalPost;
 
         if (!$originalPost) {
             return null;
         }
-        $owner = optional($originalPost->user)->userable;
+
         return [
             'id' => $originalPost->id,
             'content' => $originalPost->content,
-            'image_url' => $originalPost->image_url,
-            'video_url' => $originalPost->video_url,
+            'image' => $originalPost->image,
+            'video' => $originalPost->video,
             'created_at' => $originalPost->created_at->diffForHumans(),
-            'post_owner' => $owner ? [
-                'type' => $owner->getMorphClass(),
-                'name' => $owner instanceof Company ? $owner->name : $owner->first_name . ' ' . $owner->last_name,
-                'image' => $owner->image,
-            ] : null,
+            'post_owner' => $this->getPostOwnerDetails($originalPost->user),
         ];
     }
+
     private function isLikedByUser()
     {
         $user = Auth::guard('sanctum')->user();

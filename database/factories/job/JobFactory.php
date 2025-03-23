@@ -14,8 +14,11 @@ class JobFactory extends Factory
             'title' => $this->faker->jobTitle(),
             'company_id' =>  $this->faker->randomElement(
                 [
-                    4,
-                    5,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
                 ],
 
             ),

@@ -14,7 +14,7 @@ return new class extends Migration
             function (Blueprint $table) {
                 $table->id();
                 $table->string('image');
-                $table->string('title');
+                $table->string('name');
                 $table->text('description');
                 $table->foreignId("user_id")->constrained('users')->cascadeOnDelete();
                 $table->foreignId("specialization_id")->constrained('specializations')->cascadeOnDelete();

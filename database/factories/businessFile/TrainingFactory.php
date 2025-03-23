@@ -13,9 +13,9 @@ class TrainingFactory extends Factory
             'company_id' => Company::inRandomOrder()->value('id') ?? 1,
             'image' => $this->faker->randomElement(
                 [
-                    'https://g.aquan.website/storage/app/training/1.png',
-                    'https://g.aquan.website/storage/app/training/2.png',
-                    'https://g.aquan.website/storage/app/training/3.png',
+                    env('APP_URL') . '/public/media/training/1.png',
+                    env('APP_URL') . '/public/media/training/2.png',
+                    env('APP_URL') . '/public/media/training/3.png',
                 ],
             ),
             'title' => fake()->randomElement(

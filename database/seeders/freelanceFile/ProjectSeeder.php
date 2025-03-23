@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\freelanceFile;
+namespace Database\Seeders\FreelanceFile;
 
 use Illuminate\Database\Seeder;
 use App\Models\FreelanceFile\Project\Project;
@@ -9,6 +9,6 @@ class ProjectSeeder extends Seeder
 {
     public function run()
     {
-        Project::factory(27)->create();
+        Project::factory(25)->create();
     }
 }

@@ -13,7 +13,7 @@ class Status extends Model
     protected $fillable = [
         'user_id',
         'content',
-        'image_url',
+        'image',
         'video_url',
         'time',
     ];

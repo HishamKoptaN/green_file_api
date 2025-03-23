@@ -8,8 +8,8 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     protected $commands = [
-        \App\Console\Commands\MigrateAll::class,
         \App\Console\Commands\MigrateFreshAll::class,
+        \App\Console\Commands\ResetAndSeed::class,
 
     ];
     protected function schedule(

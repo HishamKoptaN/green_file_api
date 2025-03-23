@@ -18,10 +18,9 @@ return new class extends Migration
                 $table->string("image")->nullable();
                 $table->foreignId("country_id")->nullable()->constrained('countries')->cascadeOnDelete();
                 $table->foreignId("city_id")->nullable()->constrained('cities')->cascadeOnDelete();
-                // $table->foreignId("area_id")->constrained('areas')->cascadeOnDelete()->nullable();
                 $table->string("address")->nullable();
                 $table->date("birth_date")->nullable();
-                $table->string("marital_status")->nullable();
+                $table->string("job_title")->nullable();
                 $table->string("gender")->nullable();
                 $table->string("nationality")->nullable();
                 $table->string("phone")->nullable();

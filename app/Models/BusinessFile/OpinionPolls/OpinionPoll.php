@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models\BusinessFile\OpinionPolls;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\BusinessFile\OpinionPolls\OpinionPollFactory;
@@ -14,15 +16,20 @@ class OpinionPoll extends Model
         'content',
         'end_date',
     ];
-    public function company()
-    {
-        return $this->belongsTo(Company::class, 'company_id');
-    }
-
-
     public function responses()
     {
-        return $this->hasMany(OpinionPollResponse::class);
+        return $this->hasMany(
+            OpinionPollResponse::class,
+            'opinion_poll_id',
+        );
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(
+            Company::class,
+            'company_id',
+        );
     }
     public function options()
     {
@@ -30,7 +37,6 @@ class OpinionPoll extends Model
             OpinionPollOption::class,
         );
     }
-
     protected static function newFactory()
     {
         return OpinionPollFactory::new();

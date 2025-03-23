@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\Location\Country;
 use App\Models\Location\City;
 use App\Models\User\OpportunityLooking;
-use App\Models\User\User;
+use App\Models\User\User;use Carbon\Carbon;
+
+use App\Http\Resources\User\UserResource;
 use App\Models\User\Company;
 use App\Http\Resources\Auth\SignUpResource;
 
@@ -86,7 +88,6 @@ class SignUpController extends Controller
     public function jobSeekerSignUp(
         Request $request,
         $firebaseUid,
-
     ) {
         try {
             $opportunityLooking = OpportunityLooking::create(
@@ -94,7 +95,9 @@ class SignUpController extends Controller
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'phone' => $request->phone,
-                    'image' => "default.png",
+                    'job_title' => 'المسمي الوظيفي',
+                    'image' => env('APP_URL') . '/public/media/profile/opportunity_lookings/defalut.png',
+                    'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
                 ],
             );
             $user = User::create(
@@ -110,7 +113,9 @@ class SignUpController extends Controller
                 [
                     'token' => $token,
                     'role' => $user->getRoleNames()->first(),
-                    'user' =>  $opportunityLooking,
+                    'user' => new UserResource(
+                        $user,
+                    ),
                 ],
             );
         } catch (\Exception $e) {
@@ -127,11 +132,12 @@ class SignUpController extends Controller
             $company = Company::create(
                 [
                     'name' => $request->name,
+                    'job_title' => 'شركة مختصة بمجال',
                     'phone' => $request->phone,
                     'country_id' => $request->country_id,
                     'city_id' => $request->city_id,
-                    'image' => "default.png",
-
+                    'image' =>  env('APP_URL') . '/public/media/profile/companies/defalut.png',
+                    'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
                 ],
             );
             $user = User::create(
@@ -139,6 +145,7 @@ class SignUpController extends Controller
                     'firebase_uid' => $firebaseUid,
                     'userable_id' => $company->id,
                     'userable_type' => Company::class,
+
                 ],
             );
             $user->assignRole('company');
@@ -147,7 +154,9 @@ class SignUpController extends Controller
                 [
                     'token' => $token,
                     'role' => $user->getRoleNames()->first(),
-                    'user' =>  $company,
+                    'user' => new UserResource(
+                        $user,
+                    ),
                 ],
             );
         } catch (\Exception $e) {

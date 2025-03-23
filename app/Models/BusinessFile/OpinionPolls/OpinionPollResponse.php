@@ -3,7 +3,7 @@
 namespace App\Models\BusinessFile\OpinionPolls;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\BusinessFile\OpinionPolls\OpinionPollResponseFactory;
+use Database\Factories\businessFile\opinionPolls\OpinionPollResponseFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OpinionPollResponse extends Model

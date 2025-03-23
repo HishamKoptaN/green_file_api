@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Profile\ProfileApiController;
 //! social
 use App\Http\Controllers\Api\Social\LikeApiController;
 use App\Http\Controllers\Api\Social\StatusesApiController;
 use App\Http\Controllers\Api\Social\PostsApiController;
 use App\Http\Controllers\Api\Social\CmntsApiController;
-use App\Http\Controllers\Api\Social\FriendshipsController;
+use App\Http\Controllers\Api\Social\FriendshipsApiController;
+use App\Http\Controllers\Api\Social\FollowerApiController;
 //! freelanceFile
 use App\Http\Controllers\Api\FreelanceFile\Projects\ProjectsApiController;
 use App\Http\Controllers\Api\JobsApiController;
@@ -16,13 +18,27 @@ use App\Http\Controllers\Api\BusinessFile\CompanyPostsApiController;
 use App\Http\Controllers\Api\BusinessFile\OpinionPollsApiController;
 use App\Http\Controllers\Api\BusinessFile\ServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\TrainingApiController;
-use App\Http\Controllers\FollowController;
+
+Route::any(
+    '/profile',
+    [
+        ProfileApiController::class,
+        'handleReq',
+    ],
+);
 //! social
 Route::any(
     '/statuses',
     [
         StatusesApiController::class,
         'handleReq',
+    ],
+);
+Route::any(
+    '/user-statuses',
+    [
+        StatusesApiController::class,
+        'userStatuses',
     ],
 );
 Route::match(
@@ -50,19 +66,65 @@ Route::any(
         'handleReq',
     ],
 );
+
 //! follows
-Route::post('follow/{id}', [FollowController::class, 'follow']);
-Route::post('unfollow/{id}', [FollowController::class, 'unfollow']);
-Route::get('followers/{user}', [FollowController::class, 'followers']);
-Route::get('followings/{user}', [FollowController::class, 'followings']);
+Route::prefix('follows')->controller(FollowerApiController::class)->group(
+    function () {
+        Route::post(
+            'toggle-follow/{id}',
+            'toggleFollow',
+        );
+        Route::get(
+            'followers',
+            'followers',
+        );
+        Route::get(
+            'followings',
+            'followings',
+        );
+        Route::get(
+            'suggested',
+            'suggested',
+        );
+    },
+);
 //! Friendships
-Route::post('friends/request/{id}', [FriendshipsController::class, 'sendRequest']);
-Route::post('friends/accept/{id}', [FriendshipsController::class, 'acceptRequest']);
-Route::post('friends/reject/{id}', [FriendshipsController::class, 'rejectRequest']);
-Route::post('friends/unfriend/{id}', [FriendshipsController::class, 'unfriend']);
-Route::get('friends/list', [FriendshipsController::class, 'listFriends']);
-Route::get('friends/incoming', [FriendshipsController::class, 'incomingRequests']);
-Route::get('friends/outgoing', [FriendshipsController::class, 'outgoingRequests']);
+Route::prefix('friends')->controller(FriendshipsApiController::class)->group(
+    function () {
+        Route::post(
+            '{id}',
+            'sendRequest',
+        );
+        Route::put(
+            '{id}/accept',
+            'acceptRequest',
+        );
+        Route::put(
+            '{id}/reject',
+            'rejectRequest',
+        );
+        Route::delete(
+            '{id}',
+            'unfriend',
+        );
+        Route::get(
+            '/',
+            'friends',
+        );
+        Route::get(
+            'incoming',
+            'incomingRequests',
+        );
+        Route::get(
+            'outgoing',
+            'outgoingRequests',
+        );
+        Route::get(
+            'suggested',
+            'suggestedFriends',
+        );
+    },
+);
 //! Freelance
 Route::any(
     '/projects/{id?}',
@@ -71,13 +133,13 @@ Route::any(
         'handleReq',
     ],
 );
-
-Route::any(
-    '/jobs/{id?}',
-    [
-        JobsApiController::class,
-        'handleReq',
-    ],
+//! jobs
+Route::prefix('jobs')->controller(JobsApiController::class)->group(
+    function () {
+        Route::get('/', 'get');
+        Route::get('/suggested', 'suggested');
+        Route::post('/', 'create');
+    },
 );
 //! BusinessFil
 Route::any(
@@ -101,6 +163,7 @@ Route::any(
         'handleReq',
     ],
 );
+//! services
 Route::any(
     '/services/{id?}',
     [
@@ -108,6 +171,14 @@ Route::any(
         'handleReq',
     ],
 );
+Route::get(
+    '/search-services',
+    [
+        ServicesApiController::class,
+        'search',
+    ],
+);
+//! training
 Route::any(
     '/training/{id?}',
     [
@@ -115,110 +186,9 @@ Route::any(
         'handleReq',
     ],
 );
-
-
-
-
-
-
-Route::middleware('auth:sanctum')->group(
-    function () {
-        //         Route::any(
-        //             '/services',
-        //             [
-        //                 ServicesApiController::class,
-        //                 'handleReq',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/notifications',
-        //             [
-        //                 NotificationsApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/profile',
-        //             [
-        //                 ProfileApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/projects',
-        //             [
-        //                 ProjectsApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/jobs',
-        //             [
-        //                 JobsApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/courses',
-        //             [
-        //                 CoursesApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/ppinion-poll',
-        //             [
-        //                 OpinionPollsApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/news',
-        //             [
-        //                 NewsApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/companies',
-        //             [
-        //                 CompaniesApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/training',
-        //             [
-        //                 TrainingApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/services',
-        //             [
-        //                 ServicesApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/opinion',
-        //             [
-        //                 OpinionApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-        //         Route::any(
-        //             '/balance',
-        //             [
-        //                 BalanceApiController::class,
-        //                 'handleRequest',
-        //             ],
-        //         );
-    },
-);
 Route::get(
     '/test',
     function () {
-        return "test app";
+        return "test api";
     },
 );

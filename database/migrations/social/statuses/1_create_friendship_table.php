@@ -15,12 +15,15 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
                 $table->foreignId('friend_id')->constrained('users')->cascadeOnDelete();
-                $table->enum('status', [
-                    'pending',
-                    'accepted',
-                    'declined',
-                    'blocked',
-                ])->default('pending');
+                $table->enum(
+                    'status',
+                    [
+                        'pending',
+                        'accepted',
+                        'declined',
+                        'blocked',
+                    ],
+                )->default('pending');
                 $table->timestamps();
             },
         );

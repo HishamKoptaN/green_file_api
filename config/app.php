@@ -12,14 +12,13 @@ return [
     'timezone' => 'Europe/Istanbul',
     'locale' => 'en',
     'fallback_locale' => 'en',
+    'faker_locale' => 'en_US',
     'key' => env('APP_KEY'),
     'cipher' => 'AES-256-CBC',
     'maintenance' => [
         'driver' => 'file',
     ],
     'providers' => [
-        Laravel\Sanctum\SanctumServiceProvider::class,
-        Laravel\Tinker\TinkerServiceProvider::class,
         Kreait\Laravel\Firebase\ServiceProvider::class,
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,
@@ -48,6 +47,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
     ],
+
     'aliases' => Facade::defaultAliases()->merge([
         'Firebase' => Kreait\Laravel\Firebase\Facades\Firebase::class,
     ])->toArray(),

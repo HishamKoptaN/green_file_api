@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\User\UserResource;
 
 class CheckController extends Controller
 {
@@ -12,15 +13,18 @@ class CheckController extends Controller
         try {
             if (!Auth::guard('sanctum')->check()) {
                 return response()->json(
-                    ['error' => 'Unauthenticated'],
+                    [
+                        'error' => 'Unauthenticated',
+                    ],
                     401
                 );
             }
             $user = Auth::guard('sanctum')->user();
-            return response()->json(
-                ['data' => $user],
-                200
-            );
+            return successRes([
+                'role' => $user->getRoleNames()->first(),
+                'user' => new UserResource($user),
+            ],
+        );
         } catch (\Exception $e) {
             return response()->json(
                 ['error' => $e->getMessage()],

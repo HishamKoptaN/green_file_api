@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Social;
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
 use App\Http\Resources\Cmnt\CmntResource;
 use Illuminate\Support\Facades\Auth;

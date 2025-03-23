@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User\User;
+use App\Http\Resources\User\UserResource;
 
 class LoginController extends Controller
 {
@@ -21,8 +22,9 @@ class LoginController extends Controller
             ->withServiceAccount($credentialsPath)
             ->createAuth();
     }
-    public function authToken(Request $request)
-    {
+    public function authToken(
+        Request $request,
+    ) {
         $id_token = $request->input('id_token');
         try {
             $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
@@ -31,11 +33,13 @@ class LoginController extends Controller
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
             $user = User::where('firebase_uid', $firebaseUid)->first();
             $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
-
             return successRes(
                 [
                     'token' => $token,
                     'role' => $user->getRoleNames()->first(),
+                    'user' => new UserResource(
+                        $user,
+                    ),
                 ],
             );
         } catch (\Exception $e) {
@@ -59,10 +63,3 @@ class LoginController extends Controller
         }
     }
 }
-   // if ($user->hasRole('opportunity_looking')) {
-            //     $data = OpportunityLooking::where('user_id', $user->id)->get();
-            // } elseif ($user->hasRole('company')) {
-            //     $data = Company::where('user_id', $user->id)->get();
-            // } else {
-            //     $data = null;
-            // }

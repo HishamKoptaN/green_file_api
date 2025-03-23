@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Auth;
 class OpinionPollResource extends JsonResource
 {
     public function toArray($request)
-    {        $user = Auth::user();
-
+    {
+        $user = Auth::user();
         return [
             'id'         => $this->id,
             'content'    => $this->content,
@@ -17,7 +17,7 @@ class OpinionPollResource extends JsonResource
             'status'     => $this->status,
             'options'    => OpinionPollOptionResource::collection($this->options),
             'company' => $this->getCompanyDetails(),
-            'has_voted'  => $user ? $this->responses()->where('user_id', $user->id)->exists() : false,
+            'selected_option' => $this->getUserSelectedOption($user),
             'created_at' => $this->created_at->toDateTimeString(),
         ];
     }
@@ -34,5 +34,21 @@ class OpinionPollResource extends JsonResource
         ];
     }
 
+    private function getUserSelectedOption($user)
+    {
+        if (!$user) {
+            return null;
+        }
+
+        $response = $this->responses()
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$response) {
+            return null;
+        }
+
+        return $response->opinion_poll_option_id;  // <-- فقط رقم الاختيار
+    }
 
 }

@@ -8,6 +8,6 @@ class TrainingSeeder extends Seeder
 {
     public function run()
     {
-        Training::factory()->count(30)->create();
+        Training::factory()->count(40)->create();
     }
 }

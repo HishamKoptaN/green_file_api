@@ -12,11 +12,46 @@ class Post extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'type',
         'content',
-        'image_url',
-        'video_url',
+        'image',
+        'video',
         'original_post_id',
+        'commentable_id',
+        'commentable_type',
     ];
+    public function scopeNews(
+        $query,
+    ) {
+        return $query->where(
+            'type',
+            'news',
+        );
+    }
+    public function getIsFollowingAttribute()
+    {
+        $authUser = auth()->user();
+        if (!$authUser) {
+            return false;
+        }
+        return $authUser->following()->where('followed_id', $this->user_id)->exists();
+    }
+    public function scopeCompany(
+        $query,
+    ) {
+        return $query->where(
+            'type',
+            'company',
+        );
+    }
+    public function scopeRegular(
+        $query,
+    ) {
+        return $query->where(
+            'type',
+            'social',
+        );
+    }
     public function user()
     {
         return $this->belongsTo(

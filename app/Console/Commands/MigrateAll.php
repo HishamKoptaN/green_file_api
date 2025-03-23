@@ -5,15 +5,21 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class MigrateAll extends Command
+class ResetAll extends Command
 {
-    protected $signature = 'migrate:all';
-    protected $description = 'Run all migration files including subdirectories';
+    protected $signature = 'reset:all';
+    protected $description = 'Drop all tables and run all migrations (including subdirectories)';
+
     public function handle()
     {
-        $this->info("Resetting database...");
-        Artisan::call('migrate:fresh', ['--drop-views' => true, '--drop-types' => true]);
+        $this->info('🚨 Dropping all tables...');
+        Artisan::call('db:wipe', ['--force' => true]);
         $this->info(Artisan::output());
+
+        $this->info('🚀 Running all migrations...');
+        Artisan::call('migrate', ['--force' => true]);
+        $this->info(Artisan::output());
+
         $folders = [
             'database/migrations/locations',
             'database/migrations/users',
@@ -24,13 +30,18 @@ class MigrateAll extends Command
             'database/migrations/projects',
             'database/migrations/social/statuses',
             'database/migrations/social/posts',
+            'database/migrations/freelanceFile',
+            'database/migrations/freelanceFile/projects',
             'database/migrations/businessFile',
+            'database/migrations/businessFile/opinionPolls',
         ];
 
         foreach ($folders as $folder) {
-            $this->info("Running migrations for: $folder");
-            Artisan::call('migrate', ['--path' => $folder]);
+            $this->info("📂 Running migrations for: $folder");
+            Artisan::call('migrate', ['--path' => $folder, '--force' => true]);
             $this->info(Artisan::output());
         }
+
+        $this->info('✅ All migrations completed successfully!');
     }
 }

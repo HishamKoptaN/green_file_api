@@ -7,11 +7,10 @@
         Options -MultiViews -Indexes
     </IfModule>
     RewriteEngine On
-
     RewriteBase /
+    RewriteRule ^(posts|profile|statuses)/(.*)$ public/$1/$2 [L]
     # Allow access to storage
-    RewriteRule ^api/(.*)$ public/index.php?/$1 [L,QSA]
-    RewriteRule ^storage/(.*)$ /public/storage/$1 [L]
+    RewriteRule ^orders/(.*)$ /public/orders/$1 [L]
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -23,5 +22,4 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-
 </IfModule>

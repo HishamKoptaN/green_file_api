@@ -39,7 +39,7 @@ class StatusFactory extends Factory
                     'text_video',
                 ],
             ) ? $this->faker->paragraph : null,
-            'image_url' => in_array(
+            'image' => in_array(
                 $type,
                 [
                     'image',
@@ -47,9 +47,9 @@ class StatusFactory extends Factory
                 ],
             ) ? $this->faker->randomElement(
                 [
-                    'https://g.aquan.website/storage/app/statuses/1.png',
-                    'https://g.aquan.website/storage/app/statuses/2.png',
-                    'https://g.aquan.website/storage/app/statuses/3.png',
+                    env('APP_URL') . '/public/media/statuses/1.png',
+                    env('APP_URL') . '/public/media/statuses/2.png',
+                    env('APP_URL') . '/public//mediastatuses/3.png',
                 ],
             ) : null,
             'video_url' => in_array(

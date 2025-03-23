@@ -10,11 +10,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Social\Post\Post;
+use App\Models\Social\Status\Status;
 use App\Models\Course\Course;
 use App\Models\Course\CourseRating;
 use App\Models\Power\Role;
 use App\Models\Social\Follower;
 use App\Models\Social\Friendship;
+
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
@@ -25,16 +28,34 @@ class User extends Authenticatable
         'userable_type',
         'online_offline',
         'verified_at',
+        'created_at',
+
     ];
     protected $casts = [
         'status' => 'boolean',
     ];
-
     public function userable()
     {
         return $this->morphTo();
     }
-    public function posts()
+    public function profile()
+    {
+        return $this->morphTo();
+    }
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'followed_id');
+    }
+    public function friendships()
+    {
+        return $this->hasMany(Friendship::class, 'user_id')->orWhere('friend_id', $this->id);
+    }
+
+
+    public function statuses()
+    {
+        return $this->hasMany(Status::class);
+    } public function posts()
     {
         return $this->hasMany(Post::class);
     }
@@ -42,33 +63,52 @@ class User extends Authenticatable
     {
         return $this->hasMany(OpportunityLooking::class);
     }
+
     public function companies()
     {
         return $this->hasMany(Company::class);
     }
-    // ! Frindships
+
     public function followers()
     {
-        return $this->hasMany(Friendship::class, 'friend_id')
-                    ->where('status', 'accepted');
+        return $this->belongsToMany(
+            User::class,
+            'followers',
+            'followed_id',
+            'follower_id',
+        );
     }
+    public function follow($id)
+    {
+        return $this->followings()->attach($id);
+    }
+
+    public function unfollow($id)
+    {
+        return $this->followings()->detach($id);
+    }
+
+    public function isFollowing($id)
+    {
+        return $this->followings()->where('followed_id', $id)->exists();
+    }
+
     public function followings()
     {
-        return $this->hasMany(Friendship::class, 'user_id')
-                    ->where('status', 'accepted');
-    }
-    public function isFollowing($user)
-    {
-        return $this->followings()
-                    ->where('friend_id', $user->id)
-                    ->exists();
+        return $this->belongsToMany(
+            User::class,
+            'followers',
+            'follower_id',
+            'followed_id',
+        ) ->select('users.id');
     }
     public function isFollowedBy($user)
     {
         return $this->followers()
-                    ->where('user_id', $user->id)
-                    ->exists();
+            ->where('user_id', $user->id)
+            ->exists();
     }
+    // ! Frindships
     public function sentFriendRequests()
     {
         return $this->hasMany(Friendship::class, 'user_id')->where('status', 'pending');
@@ -88,10 +128,12 @@ class User extends Authenticatable
     }
     public function sendFriendRequest(User $user)
     {
-        return $this->sentFriendRequests()->create([
-            'friend_id' => $user->id,
-            'status' => 'pending',
-        ]);
+        return $this->sentFriendRequests()->create(
+            [
+                'friend_id' => $user->id,
+                'status' => 'pending',
+            ],
+        );
     }
     public function acceptFriendRequest(User $user)
     {
@@ -114,12 +156,7 @@ class User extends Authenticatable
                     ->orWhere('user_id', $user->id);
             })->exists();
     }
-    // ! Followers
-    public function following()
-    {
-        return $this->hasMany(Follower::class, 'follower_id');
-    }
-
+    // ! courses
 
     public function courses()
     {
@@ -130,6 +167,7 @@ class User extends Authenticatable
         return $this->hasMany(CourseRating::class);
     }
 
+    // ! userRoles
 
     public function userRoles(): BelongsToMany
     {
@@ -140,21 +178,6 @@ class User extends Authenticatable
             'role_id',
         );
     }
-    public function follow($userId)
-    {
-        if (!$this->isFollowing($userId)) {
-            return $this->following()->create(['followed_id' => $userId]);
-        }
-        return false;
-    }
-
-    public function unfollow($userId)
-    {
-        return $this->following()->where('followed_id', $userId)->delete();
-    }
-
-
-
     public function role()
     {
         return $this->belongsTo(

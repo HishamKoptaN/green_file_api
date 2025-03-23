@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -34,7 +33,9 @@ class UserAppController extends Controller
         return response()->json([
             'status' => true,
             'accountInfo' => $accountInfo,
-        ], 200);
+        ],
+         200,
+    );
     }
 
     public function updateAccountsInfo(

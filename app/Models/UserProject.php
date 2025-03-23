@@ -10,7 +10,12 @@ class UserProject extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'description', 'price'];
+    protected $fillable = [
+        'user_id',
+        'title',
+        'description',
+        'price',
+    ];
 
     public function user()
     {

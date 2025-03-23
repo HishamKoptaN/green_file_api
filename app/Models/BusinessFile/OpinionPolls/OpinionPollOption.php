@@ -11,12 +11,14 @@ class OpinionPollOption extends Model
     use HasFactory;
     protected $fillable = [
         'opinion_poll_id',
-    'option',
-    'votes',
+        'option',
+        'votes',
     ];
     public function opinionPoll()
     {
-        return $this->belongsTo(OpinionPoll::class);
+        return $this->belongsTo(
+            OpinionPoll::class,
+        );
     }
     public function responses()
     {

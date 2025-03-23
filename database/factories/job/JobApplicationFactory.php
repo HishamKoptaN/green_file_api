@@ -12,7 +12,7 @@ class JobApplicationFactory extends Factory
     public function definition()
     {
         return [
-            'message' => $this->faker->paragraph(),
+          'message' => $this->faker->sentence(10),
             'job_id' => $this->faker->numberBetween(
                 1,
                 25,

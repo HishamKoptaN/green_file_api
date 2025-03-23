@@ -19,6 +19,7 @@ return new class extends Migration
                 $table->string('video_url')->nullable();
                 $table->unsignedBigInteger('original_post_id')->nullable();
                 $table->foreign('original_post_id')->references('id')->on('posts')->cascadeOnDelete();
+                $table->enum('type', ['social', 'news', 'company'])->default('social');
                 $table->timestamps();
             },
         );

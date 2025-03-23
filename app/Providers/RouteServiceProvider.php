@@ -18,17 +18,17 @@ class RouteServiceProvider extends ServiceProvider
             'api',
             function (Request $request) {
                 return Limit::perMinute(120)->by(
-                    $request->user()?->id ?: $request->ip()
+                    $request->user()?->id ?: $request->ip(),
                 );
             },
         );
     }
-
     public function map()
     {
         $this->mapAuthRoutes();
         $this->mapApiRoutes();
-        $this->mapDashApiRoutes();
+        $this->mapDashRoutes();
+        $this->mapWebRoutes();
         $this->mapArtisanRoutes();
     }
 
@@ -50,7 +50,7 @@ class RouteServiceProvider extends ServiceProvider
             );
     }
 
-    protected function mapDashApiRoutes()
+    protected function mapDashRoutes()
     {
         Route::prefix('dash')
             ->middleware('api')
@@ -58,6 +58,16 @@ class RouteServiceProvider extends ServiceProvider
             ->group(
                 base_path(
                     'routes/dash.php',
+                ),
+            );
+    }
+    protected function mapWebRoutes()
+    {
+        Route::middleware('web')
+            ->namespace($this->namespace)
+            ->group(
+                base_path(
+                    'routes/web.php',
                 ),
             );
     }

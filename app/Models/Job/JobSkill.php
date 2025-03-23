@@ -13,8 +13,6 @@ class JobSkill extends Model
         'job_id',
         'skill_id',
     ];
-
-
     protected static function newFactory()
     {
         return JobSkillFactory::new();

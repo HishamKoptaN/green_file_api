@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Job\JobCollection;
 use App\Http\Resources\Job\JobResource;
 use App\Models\Job\Job;
+use App\Services\SuggestedJobService;
 use Illuminate\Support\Facades\Auth;
 
 class JobsApiController extends Controller
@@ -28,19 +29,33 @@ class JobsApiController extends Controller
     public function get()
     {
         try {
-            $jobs = Job::with('company')->paginate(10);;
+            $jobs = Job::with('company')->paginate(10);
             return successRes(
-                new  JobCollection(
+                paginateRes(
                     $jobs,
-                ),
+                    JobResource::class,
+                    'jobs'
+                )
             );
+
         } catch (\Exception $e) {
             return failureRes(
                 $e->getMessage(),
             );
         }
     }
-
+    public function suggested()
+    {
+        try {
+            $user = auth()->user();
+            $jobs = SuggestedJobService::getFor($user);
+            return successRes(
+                $jobs,
+            );
+        } catch (\Exception $e) {
+            return failureRes($e->getMessage());
+        }
+    }
     public function create(Request $request)
     {
         try {

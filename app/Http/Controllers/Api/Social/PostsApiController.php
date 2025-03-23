@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Resources\Social\Post\PostResource;
 use App\Models\Social\Post\Post;
+use App\Helpers\uploadImageHelper;
 
 class PostsApiController extends Controller
 {
@@ -45,32 +46,58 @@ class PostsApiController extends Controller
                 return $this->failureRes();
         }
     }
-    public function get()
+    public function get(Request $request)
     {
         try {
-            $posts = Post::orderBy('created_at', 'desc')->with('user')->paginate(10);;
-            return successRes(
-                paginateRes(
-                    $posts,
-                    PostResource::class,
-                    'posts',
-                )
-            );
+            $query = Post::with(['user.userable']);
+
+            //! إذا تم إرسال my_data=true، يتم جلب منشورات المستخدم المسجل دخول فقط
+            if (filter_var($request->my_data, FILTER_VALIDATE_BOOLEAN)) {
+                $query->where('user_id', Auth::id());
+            } else {
+                //! إذا لم يتم إرسال my_data، يمكن استخدام user_id إن وجد
+                $query->when($request->user_id, function ($q, $userId) {
+                    return $q->where('user_id', $userId);
+                });
+            }
+
+            //! فلترة بناءً على النوع (type) إذا تم إرساله
+            $query->when($request->type, function ($q, $type) {
+                return $q->where('type', $type);
+            });
+
+            //! جلب البيانات مع الترتيب الأحدث والتقسيم إلى صفحات
+            $posts = $query->latest()->paginate(4);
+
+            return successRes(paginateRes($posts, PostResource::class, 'posts'));
+
         } catch (\Exception $e) {
-            return failureRes(
-                $e->getMessage(),
-            );
+            return failureRes($e->getMessage());
         }
     }
+
+
+
+
     public function create(
         Request $request,
     ) {
         try {
+            $user = auth()->user();
+            $imagePath = $request->hasFile('image')
+                ? uploadImageHelper::uploadImage(
+                    $request,
+                    $user,
+                    'posts',
+                    'image',
+                )
+                : null;
             $post = Post::create(
                 [
                     'user_id' => auth()->id(),
                     'content' => $request->content,
-                    'original_post_id' =>$request->original_post_id,
+                    'image' => $imagePath,
+                    'original_post_id' => $request->original_post_id,
                 ],
             );
             return successRes(

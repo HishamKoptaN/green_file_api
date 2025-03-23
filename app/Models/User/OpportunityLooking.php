@@ -17,14 +17,13 @@ class OpportunityLooking extends Model
         'first_name',
         'last_name',
         'current_job',
-        'account_number',
         'image',
+        'cover_image',
         'address',
         'country_id',
         'city_id',
         'area_id',
         'birth_date',
-        'marital_status',
         'gender',
         'nationality',
         'job_title',
@@ -34,11 +33,14 @@ class OpportunityLooking extends Model
         'comment',
         'country_code',
         'verified_at',
+        'created_at',
+
+
     ];
     public function getNameAttribute()
-{
-    return $this->first_name . ' ' . $this->last_name;
-}
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
 
     public function user()
     {

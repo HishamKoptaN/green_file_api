@@ -4,15 +4,14 @@ namespace Database\Seeders\Job;
 
 use Illuminate\Database\Seeder;
 use App\Models\Job\Skill;
-use App\Models\Job\JobSpecialization;
+use App\Models\Job\Specialization;
 
 class SkillSeeder extends Seeder
 {
     public function run(): void
     {
-        $specializations = JobSpecialization::all();
-        $skillsPerSpecialization = 10; // عدد المهارات لكل تخصص
-
+        $specializations = Specialization::all();
+        $skillsPerSpecialization = 10;
         $skillsBySpecialization = [
             'تطوير الويب' => ['HTML', 'CSS', 'JavaScript', 'PHP', 'Laravel', 'React', 'Vue.js', 'Node.js', 'Bootstrap', 'Tailwind CSS'],
             'تطوير تطبيقات الهاتف' => ['Flutter', 'Kotlin', 'Swift', 'React Native', 'Dart', 'Java (Android)', 'Objective-C', 'Xamarin', 'Cordova', 'Ionic'],
@@ -33,12 +32,11 @@ class SkillSeeder extends Seeder
             if (!$specialization) {
                 continue;
             }
-
             foreach ($skills as $skill) {
-                Skill::create([
-                    'name' => $skill,
-                    'job_specialization_id' => $specialization->id,
-                ]);
+                Skill::firstOrCreate(
+                    ['name' => $skill],
+                    ['specialization_id' => $specialization->id]
+            );
             }
 
             $specializationIndex++;

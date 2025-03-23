@@ -18,9 +18,9 @@ class ServiceFactory extends Factory
             'price' => $this->faker->randomFloat(2, 10, 30),
             'image' => $this->faker->randomElement(
                 [
-                    'https://g.aquan.website/storage/app/services/1.jpeg',
-                    'https://g.aquan.website/storage/app/services/2.jpeg',
-                    'https://g.aquan.website/storage/app/services/3.jpeg',
+                    env('APP_URL') . '/public/media/services/1.jpeg',
+                    env('APP_URL') . '/public/media/services/2.jpeg',
+                    env('APP_URL') . '/public/media/services/3.jpeg',
                 ],
             ),
         ];

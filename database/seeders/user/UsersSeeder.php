@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\user;
+namespace Database\Seeders\User;
 
 use Illuminate\Database\Seeder;
 use App\Models\User\OpportunityLooking;
@@ -43,6 +43,80 @@ class UsersSeeder extends Seeder
             [
                 'id' => 4,
                 'userable_id' => 4,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676sdsdZbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 5,
+                'userable_id' => 5,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676ZsdsdbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+
+
+            [
+                'id' => 6,
+                'userable_id' => 6,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676ZsdsadbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+
+
+            [
+                'id' => 7,
+                'userable_id' => 7,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676Zsdsd12bUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+
+
+            [
+                'id' => 8,
+                'userable_id' => 8,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts767dsd6ZbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+
+
+            [
+                'id' => 9,
+                'userable_id' => 9,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts76sdsd76ZbUYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+
+
+            [
+                'id' => 10,
+                'userable_id' => 10,
+                'userable_type' => OpportunityLooking::class,
+                'status' => true,
+                'firebase_uid' => 'kC6Ts7676ZbUssdYpKHy7PvqY96huD2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            //! Company
+            [
+                'id' => 11,
+                'userable_id' => 4,
                 'userable_type' => Company::class,
                 'status' => true,
                 'firebase_uid' => 'MGReFr2p4DZcR9oW51d4eysIl5O2',
@@ -50,7 +124,7 @@ class UsersSeeder extends Seeder
                 'inactivate_end_at' => null,
             ],
             [
-                'id' => 5,
+                'id' => 12,
                 'userable_id' => 5,
                 'userable_type' => Company::class,
                 'status' => true,
@@ -58,9 +132,41 @@ class UsersSeeder extends Seeder
                 'online_offline' => 'online',
                 'inactivate_end_at' => null,
             ],
+            [
+                'id' => 13,
+                'userable_id' => 5,
+                'userable_type' => Company::class,
+                'status' => true,
+                'firebase_uid' => 'oskFMJPzWIV7S19Nfxae15M5bqme2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 14,
+                'userable_id' => 5,
+                'userable_type' => Company::class,
+                'status' => true,
+                'firebase_uid' => 'os2kFMJPzWIV7S9Nfxae15M5bqme2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
+            [
+                'id' => 15,
+                'userable_id' => 5,
+                'userable_type' => Company::class,
+                'status' => true,
+                'firebase_uid' => 'oskFMJPzWIV7S9N1fxae15M5bqme2',
+                'online_offline' => 'online',
+                'inactivate_end_at' => null,
+            ],
         ];
         foreach ($users as $userData) {
-            User::create($userData);
+            User::updateOrInsert(
+                ['id' => $userData['id']],
+                $userData
+            );
+
         }
+
     }
 }
