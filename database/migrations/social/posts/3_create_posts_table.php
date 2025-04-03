@@ -15,11 +15,11 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->text('content')->nullable();
-                $table->string('image_url')->nullable();
-                $table->string('video_url')->nullable();
-                $table->unsignedBigInteger('original_post_id')->nullable();
-                $table->foreign('original_post_id')->references('id')->on('posts')->cascadeOnDelete();
+                $table->text('image_url')->nullable();
+                $table->text('video_url')->nullable();
+                $table->foreignId('original_post_id')->nullable()->constrained('posts')->cascadeOnDelete()->index();
                 $table->enum('type', ['social', 'news', 'company'])->default('social');
+                $table->timestamp('publish_at')->nullable()->index();
                 $table->timestamps();
             },
         );

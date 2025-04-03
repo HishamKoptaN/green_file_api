@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Event;
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
+        \App\Events\NotificationSent::class => [
+            \App\Listeners\SendNotificationListener::class,
         ],
+
     ];
 
     public function boot(): void {}

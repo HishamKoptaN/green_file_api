@@ -24,6 +24,7 @@ class User extends Authenticatable
     protected $fillable = [
         'status',
         'firebase_uid',
+        'fcm_token',
         'userable_id',
         'userable_type',
         'online_offline',

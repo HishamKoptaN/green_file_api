@@ -97,7 +97,7 @@ class SignUpController extends Controller
                     'phone' => $request->phone,
                     'job_title' => 'المسمي الوظيفي',
                     'image' => env('APP_URL') . '/public/media/profile/opportunity_lookings/defalut.png',
-                    'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
+                    // 'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
                 ],
             );
             $user = User::create(
@@ -137,7 +137,7 @@ class SignUpController extends Controller
                     'country_id' => $request->country_id,
                     'city_id' => $request->city_id,
                     'image' =>  env('APP_URL') . '/public/media/profile/companies/defalut.png',
-                    'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
+                    // 'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
                 ],
             );
             $user = User::create(

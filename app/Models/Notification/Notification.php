@@ -13,14 +13,27 @@ class Notification extends Model
     use HasFactory;
     protected $fillable = [
         'id',
+        'user_id',
+        'image',
+        'title',
+        'body',
         'public',
         'message',
-        'read_at',
+        'data',
+        'is_read',
     ];
-    public function getPublicAttribute($value)
+    public function recipients()
     {
+        return $this->hasMany(
+            NotificationRecipient::class,
+        );
+    }
+    public function getPublicAttribute(
+        $value,
+    ) {
         return (bool) $value;
     }
+
     public function users()
     {
         return $this->belongsToMany(

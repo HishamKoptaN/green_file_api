@@ -22,6 +22,7 @@ class PostResource extends JsonResource
             'comments_count' => $this->comments()->count(),
             'type' => $this->type,
             'created_at' => $this->created_at->diffForHumans(),
+            'publish_at' => $this->publish_at,
         ];
     }
 
@@ -40,7 +41,6 @@ class PostResource extends JsonResource
         $owner = $user->userable;
         $authUser = Auth::guard('sanctum')->user();
         $isFollowing = $authUser ? $authUser->following()->where('followed_id', $user->id)->exists() : false;
-
         return [
             'id' => $owner->id,
             'type' => $owner->getMorphClass(),

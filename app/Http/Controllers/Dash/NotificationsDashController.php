@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dash;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Notification;
+use App\Models\Notification\Notification;
 
 class NotificationsDashController extends Controller
 {
@@ -32,6 +32,17 @@ class NotificationsDashController extends Controller
         }
     }
 
+    public function store(
+        Request $request,
+    ) {
+        $notificationData = [
+            'title' => $request->input('title'),
+            'body' => $request->input('body'),
+            'user_id' => $request->input('user_id'),
+            'created_at' => now()->toDateTimeString()
+        ];
+        return response()->json($response);
+    }
     protected function get()
     {
         $notifications = Notification::orderBy('created_at', 'desc')->get();
@@ -42,12 +53,6 @@ class NotificationsDashController extends Controller
 
     public function post(Request $request)
     {
-        $notification = Notification::create([
-            'message' => $request->message,
-            'notifiable_id' => $request->public ? json_encode($request->notifiable_id) : null,
-            'public' => $request->public,
-        ]);
-
         return $this->successRes($notification);
     }
 }

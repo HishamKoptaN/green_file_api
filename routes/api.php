@@ -18,7 +18,23 @@ use App\Http\Controllers\Api\BusinessFile\CompanyPostsApiController;
 use App\Http\Controllers\Api\BusinessFile\OpinionPollsApiController;
 use App\Http\Controllers\Api\BusinessFile\ServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\TrainingApiController;
+use App\Http\Controllers\Api\NotificationsApiController;
+use App\Http\Controllers\FirebaseNotificationController;
 
+Route::post(
+    '/create-device-group',
+    [
+        FirebaseNotificationController::class,
+        'createDeviceGroup',
+    ],
+);
+Route::any(
+    '/notifications',
+    [
+        NotificationsApiController::class,
+        'handleReq',
+    ],
+);
 Route::any(
     '/profile',
     [
@@ -41,17 +57,28 @@ Route::any(
         'userStatuses',
     ],
 );
-Route::match(
+Route::post(
+    '/posts/share',
     [
-        'GET',
-        'POST',
+        PostsApiController::class,
+        'sharePost',
     ],
+);
+Route::get(
     '/posts',
     [
         PostsApiController::class,
-        'handleReq',
+        'get',
     ],
 );
+Route::post(
+    '/posts',
+    [
+        PostsApiController::class,
+        'create',
+    ],
+);
+
 Route::any(
     '/likes/{id?}',
     [

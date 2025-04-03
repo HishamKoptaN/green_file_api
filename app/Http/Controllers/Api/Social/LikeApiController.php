@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Social\Post\Like;
+use App\Events\NotificationSent;
 
 class LikeApiController extends Controller
 {
@@ -27,38 +28,66 @@ class LikeApiController extends Controller
     }
     public function toggleLike(Request $request)
     {
-        $request->validate([
-            'likeable_id' => 'required|integer',
-            'likeable_type' => 'required|string|in:post,product'
-        ]);
         $modelMapping = [
-            'post' => 'App\\Models\\Post',
-            'product' => 'App\\Models\\Product',
+            'post' => 'App\\Models\\Social\\Post\\Post',
         ];
 
         $likeableType = $modelMapping[$request->likeable_type] ?? null;
-
-        if (!$likeableType) {
-            return response()->json(['error' => 'Invalid likeable_type'], 400);
-        }
-
         $user = Auth::user();
-        $existingLike = Like::where([
-            'user_id' => $user->id,
-            'likeable_id' => $request->likeable_id,
-            'likeable_type' => $likeableType,
-        ])->first();
-
-        if ($existingLike) {
-            $existingLike->delete();
-            return response()->json();
-        } else {
-            Like::create([
+        $likeableItem = $likeableType::find(
+            $request->likeable_id,
+        );
+        if (!$likeableItem) {
+            return response()->json(
+                [
+                    'error' => 'Item not found',
+                ],
+                404,
+            );
+        }
+        //! التحقق مما إذا كان الإعجاب موجودًا بالفعل
+        $existingLike = Like::where(
+            [
                 'user_id' => $user->id,
                 'likeable_id' => $request->likeable_id,
                 'likeable_type' => $likeableType,
-            ]);
-            return response()->json();
+            ],
+        )->first();
+        if ($existingLike) {
+            $existingLike->delete();
+            return response()->json(
+                [
+                    'message' => 'Like removed',
+                ],
+            );
+        } else {
+            Like::create(
+                [
+                    'user_id' => $user->id,
+                    'likeable_id' => $request->likeable_id,
+                    'likeable_type' => $likeableType,
+                ],
+            );
+            //! التحقق من وجود المالك
+            if (isset($likeableItem->user) && $likeableItem->user->id !== $user->id) {
+                //! الحصول على اسم المستخدم بشكل ديناميكي
+                $userName = $user->userable ? $user->userable->first_name : $user->first_name;
+                $image = $user->userable ? $user->userable->image : null;
+                event(
+                    new NotificationSent(
+                        userId: $likeableItem->user->id,
+                        title: 'إشعار جديد',
+                        body: "{$userName} أُعجب بمنشورك!",
+                        image: $image,
+                        data: [
+                            'key' => 'value',
+                        ]
+                    ),
+                );
+            }
+            return response()->json(
+                [],
+            );
         }
     }
 }

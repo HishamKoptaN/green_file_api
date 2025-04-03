@@ -40,34 +40,32 @@ class StatusesApiController extends Controller
                         $query->latest()->limit(15);
                     },
                 ],
-            )->has('statuses')->paginate(10);
+            )->has('statuses')->where('id', '!=', auth()->id())->paginate(10);
             return successRes(
                 paginateRes(
                     $userStatuses,
                     UserStatusResource::class,
-                    'userStatuses'
-                )
-            );
-        } catch (\Exception $e) {
-            return failureRes($e->getMessage());
-        }
-    }
-    public function userStatuses()
-    {
-        try {
-            $user = auth()->user();
-            $userStatuses = $user->statuses()->paginate(15);
-            return successRes(
-                paginateRes(
-                    $userStatuses,
-                    StatusResource::class,
-                    'user_statuses',
+                    'user_statuses'
                 )
             );
         } catch (\Exception $e) {
             return failureRes(
                 $e->getMessage(),
             );
+        }
+    }
+    public function userStatuses()
+    {
+        try {
+            $user = auth()->user();
+            $userStatuses = $user->statuses()->get();
+            return successRes(
+                StatusResource::collection(
+                    $userStatuses,
+                ),
+            );
+        } catch (\Exception $e) {
+            return failureRes($e->getMessage());
         }
     }
 
@@ -79,11 +77,20 @@ class StatusesApiController extends Controller
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-            $imagePath = uploadImageHelper::uploadImage(
-                $request,
-                $user,
-                'statuses'
-            );
+            $imagePath = $request->hasFile('image')
+                ?  uploadImageHelper::uploadImage(
+                    $request,
+                    $user,
+                    'statuses'
+                ) : null;
+            // $imagePath = $request->hasFile('image')
+            //     ? uploadImageHelper::uploadImage(
+            //         $request,
+            //         $user,
+            //         'posts',
+            //         'image',
+            //     )
+            //     : null;
             $status = Status::create(
                 [
                     'user_id' => $user->id,

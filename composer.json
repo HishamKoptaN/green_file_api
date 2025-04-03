@@ -11,6 +11,7 @@
         "laravel/framework": "^9.0",
         "php": "^8.0",
         "doctrine/dbal": "^3.8",
+        "laravel-notification-channels/fcm": "^2.4",
         "google/apiclient": "*",
         "google/auth": "^1.45",
         "guzzlehttp/guzzle": "^7",
@@ -39,7 +40,8 @@
             "app/Helpers/api_helpers.php",
             "app/Helpers/pagination_helper.php",
             "app/Helpers/uploadImageHelper.php",
-            "app/Helpers/updateImageHelper.php"
+            "app/Helpers/updateImageHelper.php",
+            "app/Helpers/NotificationHelper.php"
 
 
 

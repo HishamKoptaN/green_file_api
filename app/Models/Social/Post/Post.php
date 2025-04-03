@@ -17,9 +17,22 @@ class Post extends Model
         'image',
         'video',
         'original_post_id',
+        'publish_at',
         'commentable_id',
         'commentable_type',
     ];
+    public function scopePublished(
+        $query,
+    ) {
+        return $query->whereNotNull(
+            'publish_at',
+        )
+            ->where(
+                'publish_at',
+                '<=',
+                now(),
+            );
+    }
     public function scopeNews(
         $query,
     ) {

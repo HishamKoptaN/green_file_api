@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User\User;
 use App\Http\Resources\User\UserResource;
+use App\Http\Controllers\Api\UserDeviceTokenApiController;
+use App\Models\User\UserDeviceToken;
 
 class LoginController extends Controller
 {
@@ -33,6 +35,16 @@ class LoginController extends Controller
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
             $user = User::where('firebase_uid', $firebaseUid)->first();
             $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
+            UserDeviceToken::updateOrCreate(
+                [
+                    'device_token' => $request->device_token ?? '',
+                ],
+                [
+                    'user_id' => $user->id,
+                    'device_type' => $request->device_type,
+                    'updated_at' => now(),
+                ],
+            );
             return successRes(
                 [
                     'token' => $token,

@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Resources\User\UserResource;
+use App\Models\User\UserDeviceToken;
 
 class CheckController extends Controller
 {
-    public function check()
-    {
+    public function check(
+        Request $request,
+    ) {
         try {
             if (!Auth::guard('sanctum')->check()) {
                 return response()->json(
@@ -20,11 +23,22 @@ class CheckController extends Controller
                 );
             }
             $user = Auth::guard('sanctum')->user();
-            return successRes([
-                'role' => $user->getRoleNames()->first(),
-                'user' => new UserResource($user),
-            ],
-        );
+            UserDeviceToken::updateOrCreate(
+                [
+                    'device_token' => $request->device_token,
+                ],
+                [
+                    'user_id' => $user->id,
+                    'device_type' => $request->device_type,
+                    'updated_at' => now(),
+                ],
+            );
+            return successRes(
+                [
+                    'role' => $user->getRoleNames()->first(),
+                    'user' => new UserResource($user),
+                ],
+            );
         } catch (\Exception $e) {
             return response()->json(
                 ['error' => $e->getMessage()],
