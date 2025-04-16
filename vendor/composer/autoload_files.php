@@ -43,4 +43,5 @@ return array(
     '9c288368fb7ec4629c4cccc3f4fb49d8' => $baseDir . '/app/Helpers/pagination_helper.php',
     'f98cac06c4d30cf93272b8d7b918c533' => $baseDir . '/app/Helpers/uploadImageHelper.php',
     'e5f04c7bdb53def84b1374f033435553' => $baseDir . '/app/Helpers/updateImageHelper.php',
+    'e5390d22ab5f268cc3fd002a7081464c' => $baseDir . '/app/Helpers/NotificationHelper.php',
 );

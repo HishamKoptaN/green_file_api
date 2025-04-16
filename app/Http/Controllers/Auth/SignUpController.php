@@ -8,10 +8,13 @@ use Illuminate\Http\Request;
 use App\Models\Location\Country;
 use App\Models\Location\City;
 use App\Models\User\OpportunityLooking;
-use App\Models\User\User;use Carbon\Carbon;
+use App\Models\User\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 use App\Http\Resources\User\UserResource;
 use App\Models\User\Company;
+use App\Models\Cvs\Cv;
 use App\Http\Resources\Auth\SignUpResource;
 
 class SignUpController extends Controller
@@ -69,100 +72,96 @@ class SignUpController extends Controller
             );
         }
     }
-    public function signUp(Request $request)
-    {
+    public function signUp(
+        Request $request,
+    ) {
         try {
             $id_token = $request->input('id_token');
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($id_token);
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken(
+                $id_token,
+            );
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
             if ($request->userable_type === 'company') {
-                return $this->companySignUp($request, $firebaseUid);
+                return $this->companySignUp(
+                    $request,
+                    $firebaseUid,
+                );
             } elseif ($request->userable_type === 'opportunity_looking') {
-                return $this->jobSeekerSignUp($request, $firebaseUid);
+                return $this->jobSeekerSignUp(
+                    $request,
+                    $firebaseUid,
+                );
             }
             return failureRes("نوع المستخدم غير صالح.");
         } catch (\Exception $e) {
             return failureRes($e->getMessage());
         }
     }
-    public function jobSeekerSignUp(
-        Request $request,
-        $firebaseUid,
-    ) {
+
+    public function jobSeekerSignUp(Request $request, $firebaseUid)
+    {
         try {
-            $opportunityLooking = OpportunityLooking::create(
-                [
+            return DB::transaction(function () use ($request, $firebaseUid) {
+                $opportunityLooking = OpportunityLooking::create([
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'phone' => $request->phone,
                     'job_title' => 'المسمي الوظيفي',
                     'image' => env('APP_URL') . '/public/media/profile/opportunity_lookings/defalut.png',
-                    // 'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
-                ],
-            );
-            $user = User::create(
-                [
+                ]);
+
+                $user = User::create([
                     'firebase_uid' => $firebaseUid,
                     'userable_id' => $opportunityLooking->id,
                     'userable_type' => OpportunityLooking::class,
-                ],
-            );
-            $user->assignRole('opportunity_looking');
-            $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
-            return successRes(
-                [
+                ]);
+
+                $user->assignRole('opportunity_looking');
+                $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
+
+                return successRes([
                     'token' => $token,
                     'role' => $user->getRoleNames()->first(),
-                    'user' => new UserResource(
-                        $user,
-                    ),
-                ],
-            );
+                    'user' => new UserResource($user),
+                ]);
+            });
         } catch (\Exception $e) {
-            return failureRes(
-                $e->getMessage(),
-            );
+            return failureRes($e->getMessage());
         }
     }
-    public function companySignUp(
-        Request $request,
-        $firebaseUid,
-    ) {
-        try {
-            $company = Company::create(
-                [
-                    'name' => $request->name,
-                    'job_title' => 'شركة مختصة بمجال',
-                    'phone' => $request->phone,
-                    'country_id' => $request->country_id,
-                    'city_id' => $request->city_id,
-                    'image' =>  env('APP_URL') . '/public/media/profile/companies/defalut.png',
-                    // 'created_at' => Carbon::create(rand(2015, 2022), rand(1, 12), rand(1, 28)), // تاريخ عشوائي بين 2015 و 2022
-                ],
-            );
-            $user = User::create(
-                [
-                    'firebase_uid' => $firebaseUid,
-                    'userable_id' => $company->id,
-                    'userable_type' => Company::class,
 
-                ],
-            );
-            $user->assignRole('company');
-            $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
-            return successRes(
-                [
-                    'token' => $token,
-                    'role' => $user->getRoleNames()->first(),
-                    'user' => new UserResource(
-                        $user,
-                    ),
-                ],
+    public function companySignUp(Request $request, $firebaseUid)
+    {
+        try {
+            return DB::transaction(
+                function () use ($request, $firebaseUid) {
+                    $company = Company::create([
+                        'name' => $request->name,
+                        'job_title' => 'شركة مختصة بمجال',
+                        'phone' => $request->phone,
+                        'country_id' => $request->country_id,
+                        'city_id' => $request->city_id,
+                        'image' => env('APP_URL') . '/public/media/profile/companies/defalut.png',
+                    ]);
+
+                    $user = User::create([
+                        'firebase_uid' => $firebaseUid,
+                        'userable_id' => $company->id,
+                        'userable_type' => Company::class,
+                    ]);
+
+                    $user->assignRole('company');
+                    $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
+
+                    return successRes([
+                        'token' => $token,
+                        'role' => $user->getRoleNames()->first(),
+                        'user' => new UserResource($user),
+                    ]);
+                },
             );
         } catch (\Exception $e) {
-            return failureRes(
-                $e->getMessage(),
-            );
+            return failureRes($e->getMessage());
         }
     }
 }

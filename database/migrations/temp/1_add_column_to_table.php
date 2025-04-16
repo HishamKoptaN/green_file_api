@@ -6,16 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
+    public function up()
+    {
+        Schema::dropIfExists('posts');
+    }
     public function up()
     {
         Schema::table(
-            'notifications',
+            'polls',
             function (Blueprint $table) {
-                $table->string('image')->nullable()->after('type');
-                $table->json('data')->nullable()->after('image');
+                $table->timestamp('question')->nullable()->after('id');
             },
         );
     }
 };
-

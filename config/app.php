@@ -19,7 +19,6 @@ return [
         'driver' => 'file',
     ],
     'providers' => [
-        BeyondCode\LaravelWebSockets\WebSocketsServiceProvider::class,
         Kreait\Laravel\Firebase\ServiceProvider::class,
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,

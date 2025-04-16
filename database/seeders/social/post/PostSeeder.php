@@ -4,10 +4,18 @@ namespace Database\Seeders\Social\Post;
 
 use Illuminate\Database\Seeder;
 use App\Models\Social\Post\Post;
+
 class PostSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        Post::factory(50)->create();
+        // Event Posts
+        Post::factory()->count(15)->eventPost()->create();
+
+        // Poll Posts
+        Post::factory()->count(15)->pollPost()->create();
+
+        // Shared Posts
+        // Post::factory()->count(15)->sharedPost()->create();
     }
 }

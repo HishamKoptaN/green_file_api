@@ -52,7 +52,7 @@ class StatusFactory extends Factory
                     env('APP_URL') . '/public//mediastatuses/3.png',
                 ],
             ) : null,
-            'video_url' => in_array(
+            'video' => in_array(
                 $type,
                 [
                     'video',

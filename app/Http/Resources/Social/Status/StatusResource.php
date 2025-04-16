@@ -13,7 +13,7 @@ class StatusResource extends JsonResource
             'id' => $this->id,
             'content' => $this->content,
             'image' => $this->image,
-            'video_url' => $this->video_url,
+            'video' => $this->video,
             'created_at' => $this->created_at->diffForHumans(),
             'updated_at' => $this->updated_at->diffForHumans(),
         ];

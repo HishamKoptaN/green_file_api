@@ -20,6 +20,22 @@ use App\Http\Controllers\Api\BusinessFile\ServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\TrainingApiController;
 use App\Http\Controllers\Api\NotificationsApiController;
 use App\Http\Controllers\FirebaseNotificationController;
+use App\Http\Controllers\Api\Cvs\CvsApiController;
+
+Route::get(
+    '/cv',
+    [
+        CvsApiController::class,
+        'getCv',
+    ],
+);
+Route::post(
+    '/cv',
+    [
+        CvsApiController::class,
+        'updateCv',
+    ],
+);
 
 Route::post(
     '/create-device-group',
@@ -64,6 +80,7 @@ Route::post(
         'sharePost',
     ],
 );
+//! posts
 Route::get(
     '/posts',
     [
@@ -78,6 +95,8 @@ Route::post(
         'create',
     ],
 );
+
+
 
 Route::any(
     '/likes/{id?}',

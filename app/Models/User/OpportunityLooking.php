@@ -12,7 +12,6 @@ class OpportunityLooking extends Model
     use HasFactory;
     protected $fillable = [
         'id',
-        'user_id',
         'status',
         'first_name',
         'last_name',
@@ -49,8 +48,6 @@ class OpportunityLooking extends Model
             'userable',
         );
     }
-
-
     protected static function newFactory()
     {
         return OpportunityLookingFactory::new();

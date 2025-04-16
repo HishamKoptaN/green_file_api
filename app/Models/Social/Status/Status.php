@@ -14,7 +14,7 @@ class Status extends Model
         'user_id',
         'content',
         'image',
-        'video_url',
+        'video',
         'time',
     ];
     public function user()

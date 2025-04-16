@@ -26,6 +26,8 @@ class UserStatusResource extends JsonResource
             'type' => $owner->getMorphClass(),
             'name' => $owner instanceof Company ? $owner->name : ($owner->first_name . ' ' . $owner->last_name),
             'image' => $owner->image,
+            'video' => $owner->video,
         ];
     }
 }
+

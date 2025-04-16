@@ -9,7 +9,6 @@ use App\Http\Resources\Social\Status\StatusResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Social\Status\Status;
 use App\Helpers\uploadImageHelper;
-
 use App\Models\User\User;
 
 class StatusesApiController extends Controller
@@ -58,16 +57,17 @@ class StatusesApiController extends Controller
     {
         try {
             $user = auth()->user();
-            $userStatuses = $user->statuses()->get();
+            $userStatuses = $user->statuses()->latest()->get();
             return successRes(
-                StatusResource::collection(
-                    $userStatuses,
-                ),
+                StatusResource::collection($userStatuses)
             );
         } catch (\Exception $e) {
-            return failureRes($e->getMessage());
+            return failureRes(
+                $e->getMessage(),
+            );
         }
     }
+
 
     public function create(
         Request $request,
@@ -78,24 +78,24 @@ class StatusesApiController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
             $imagePath = $request->hasFile('image')
-                ?  uploadImageHelper::uploadImage(
+                ?  uploadImageHelper::uploadFile(
                     $request,
                     $user,
                     'statuses'
                 ) : null;
-            // $imagePath = $request->hasFile('image')
-            //     ? uploadImageHelper::uploadImage(
-            //         $request,
-            //         $user,
-            //         'posts',
-            //         'image',
-            //     )
-            //     : null;
+            $videoPath = $request->hasFile('video')
+                ?  uploadImageHelper::uploadFile(
+                    request: $request,
+                    user: $user,
+                    folder: 'statuses',
+                    fieldName: 'video',
+                ) : null;
             $status = Status::create(
                 [
                     'user_id' => $user->id,
                     'content' => $request->filled('content') ? $request->content : null,
                     'image' => $imagePath,
+                    'video' => $videoPath,
                 ],
             );
             return successRes(

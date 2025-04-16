@@ -6,21 +6,67 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\social\post\PostFactory;
 use App\Models\User\User;
+use App\Models\Social\Post\Poll;
+use App\Models\Social\Post\Event;
 
 class Post extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'type',
-        'content',
-        'image',
-        'video',
-        'original_post_id',
         'publish_at',
         'commentable_id',
         'commentable_type',
     ];
+
+    //! Relations
+    public function postable()
+    {
+        return $this->morphTo();
+    }
+    public function user()
+    {
+        return $this->belongsTo(
+            User::class,
+        );
+    }
+    public function comments()
+    {
+        return $this->morphMany(
+            Comment::class,
+            'commentable',
+        );
+    }
+    public function likes()
+    {
+        return $this->morphMany(
+            Like::class,
+            'likeable',
+        );
+    }
+    protected static function newFactory()
+    {
+        return PostFactory::new();
+    }
+    public function getStatusAttribute()
+    {
+        if (is_null($this->publish_at)) {
+            return 'draft';
+        }
+        if ($this->publish_at > now()) {
+            return 'scheduled';
+        }
+        return 'published';
+    }
+
+    public function sharedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'post_shares')->withTimestamps();
+    }
+    public function shares()
+    {
+        return $this->hasMany(Post::class, 'original_post_id');
+    }
     public function scopePublished(
         $query,
     ) {
@@ -65,36 +111,10 @@ class Post extends Model
             'social',
         );
     }
-    public function user()
+    public function getPostTypeAttribute()
     {
-        return $this->belongsTo(
-            User::class,
+        return class_basename(
+            $this->postable_type,
         );
-    }
-    public function comments()
-    {
-        return $this->morphMany(
-            Comment::class,
-            'commentable',
-        );
-    }
-    public function likes()
-    {
-        return $this->morphMany(
-            Like::class,
-            'likeable',
-        );
-    }
-    public function originalPost()
-    {
-        return $this->belongsTo(
-            Post::class,
-            'original_post_id',
-        );
-    }
-
-    protected static function newFactory()
-    {
-        return PostFactory::new();
     }
 }

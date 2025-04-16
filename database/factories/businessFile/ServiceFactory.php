@@ -1,7 +1,6 @@
 <?php
 
 namespace Database\Factories\BusinessFile;
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User\OpportunityLooking;
 use App\Models\BusinessFile\Service;

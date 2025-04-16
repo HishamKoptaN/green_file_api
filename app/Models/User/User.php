@@ -15,6 +15,7 @@ use App\Models\Course\Course;
 use App\Models\Course\CourseRating;
 use App\Models\Power\Role;
 use App\Models\Social\Follower;
+use App\Models\Cvs\Cv;
 use App\Models\Social\Friendship;
 
 
@@ -30,7 +31,6 @@ class User extends Authenticatable
         'online_offline',
         'verified_at',
         'created_at',
-
     ];
     protected $casts = [
         'status' => 'boolean',
@@ -43,20 +43,34 @@ class User extends Authenticatable
     {
         return $this->morphTo();
     }
+    public function sharedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_shares')->withTimestamps();
+    }
     public function following()
     {
-        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'followed_id');
+        return $this->belongsToMany(
+            User::class,
+            'followers',
+            'follower_id',
+            'followed_id',
+        );
     }
     public function friendships()
     {
-        return $this->hasMany(Friendship::class, 'user_id')->orWhere('friend_id', $this->id);
+        return $this->hasMany(
+            Friendship::class,
+            'user_id',
+        )->orWhere(
+            'friend_id',
+            $this->id,
+        );
     }
-
-
     public function statuses()
     {
         return $this->hasMany(Status::class);
-    } public function posts()
+    }
+    public function posts()
     {
         return $this->hasMany(Post::class);
     }
@@ -69,7 +83,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Company::class);
     }
-
     public function followers()
     {
         return $this->belongsToMany(
@@ -93,7 +106,6 @@ class User extends Authenticatable
     {
         return $this->followings()->where('followed_id', $id)->exists();
     }
-
     public function followings()
     {
         return $this->belongsToMany(
@@ -101,7 +113,7 @@ class User extends Authenticatable
             'followers',
             'follower_id',
             'followed_id',
-        ) ->select('users.id');
+        )->select('users.id');
     }
     public function isFollowedBy($user)
     {
@@ -167,9 +179,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(CourseRating::class);
     }
-
     // ! userRoles
-
     public function userRoles(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -213,6 +223,12 @@ class User extends Authenticatable
         return $this->hasMany(
             User::class,
             'refered_by',
+        );
+    }
+    public function cv()
+    {
+        return $this->hasOne(
+            Cv::class,
         );
     }
 }

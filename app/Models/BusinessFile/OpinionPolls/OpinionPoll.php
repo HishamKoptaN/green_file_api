@@ -12,6 +12,7 @@ class OpinionPoll extends Model
     use HasFactory;
     protected $fillable = [
         'status',
+        'content',
         'company_id',
         'content',
         'end_date',

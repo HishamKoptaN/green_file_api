@@ -26,12 +26,12 @@ class LikeApiController extends Controller
                 return $this->failureRes();
         }
     }
-    public function toggleLike(Request $request)
-    {
+    public function toggleLike(
+        Request $request,
+    ) {
         $modelMapping = [
             'post' => 'App\\Models\\Social\\Post\\Post',
         ];
-
         $likeableType = $modelMapping[$request->likeable_type] ?? null;
         $user = Auth::user();
         $likeableItem = $likeableType::find(

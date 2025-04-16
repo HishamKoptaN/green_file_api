@@ -12,7 +12,6 @@ class OpinionPollOption extends Model
     protected $fillable = [
         'opinion_poll_id',
         'option',
-        'votes',
     ];
     public function opinionPoll()
     {

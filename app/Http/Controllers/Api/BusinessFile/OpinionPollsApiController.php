@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\BusinessFile;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BusinessFile\OpinionPolls\OpinionPollResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\BusinessFile\OpinionPolls\OpinionPoll;
+use Illuminate\Support\Facades\DB;
 
 class OpinionPollsApiController extends Controller
 {
@@ -16,6 +16,10 @@ class OpinionPollsApiController extends Controller
         switch ($request->method()) {
             case 'GET':
                 return $this->get(
+                    $request,
+                );
+            case 'POST':
+                return $this->create(
                     $request,
                 );
             default:
@@ -46,36 +50,42 @@ class OpinionPollsApiController extends Controller
             );
         }
     }
-    public function create(
-        Request $request,
-    ) {
+    public function create(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'content' => 'required|string',
+                'options' => 'required|array|min:2',
+                'options.*' => 'required|string',
+            ],
+        );
+        DB::beginTransaction();
         try {
-            $user = Auth::guard('sanctum')->user();
-            if (!$user) {
-                return response()->json(
-                    [
-                        'error' => 'Unauthorized',
-                    ],
-                    401,
-                );
-            }
-            $new = OpinionPoll::create(
+            $poll = OpinionPoll::create(
                 [
-                    'post_id' => $request->id,
-                    'user_id' => $user->id,
-                    'comment' => $request->comment,
+                    'content' => $validated['content'],
+                    'company_id' => $request->company_id ?? 12,
+                    'end_date' => $validated['end_date'] ?? null,
                 ],
             );
+            foreach ($validated['options'] as $optionText) {
+                $poll->options()->create(
+                    [
+                        'option' => $optionText,
+                        'votes' => 0,
+                    ],
+                );
+            }
+            // تأكيد العملية في قاعدة البيانات
+            DB::commit();
             return successRes(
-                new OpinionPollResource(
-                    $new->fresh(),
-                ),
+                new OpinionPollResource($poll->fresh()),
                 201
             );
         } catch (\Exception $e) {
-            return failureRes(
-                $e->getMessage(),
-            );
+            // التراجع عن العملية في حالة حدوث خطأ
+            DB::rollBack();
+            return failureRes($e->getMessage());
         }
     }
 }

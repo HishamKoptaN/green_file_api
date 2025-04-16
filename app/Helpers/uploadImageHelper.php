@@ -8,41 +8,72 @@ use Illuminate\Support\Facades\Log;
 
 class uploadImageHelper
 {
-    public static function uploadImage(
+    public static function uploadFile(
         Request $request,
         $user,
         $folder,
-        $fieldName = 'image',
+        $fieldName = 'file'
     ) {
-
-        $image = $request->file(
+        $file = $request->file(
             $fieldName,
         );
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        //! المسار الكامل حيث سيتم تخزين الصورة
-        $destinationFolder = "/home/u943485201/domains/aquan.website/public_html/aquan_api/public/{$folder}/{$user->id}/";
-        //! التأكد من أن المجلد موجود، وإلا نقوم بإنشائه
-        if (!File::exists(
-            $destinationFolder,
-        )) {
-            File::makeDirectory(
-                $destinationFolder,
-                0777,
-                true,
-                true,
-            );
+        if (!$file) {
+            throw new \Exception("لم يتم العثور على الملف.");
         }
+        // الحصول على اسم الملف وامتداده
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        // تحديد المجلد بناءً على نوع الملف
+        switch (strtolower($extension)) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'bmp':
+                $folder = 'images';
+                break;
+
+            case 'pdf':
+                $folder = 'pdfs';
+                break;
+
+            case 'mp4':
+            case 'avi':
+            case 'mkv':
+                $folder = 'videos';
+                break;
+
+            case 'mp3':
+            case 'wav':
+            case 'ogg':
+                $folder = 'audios';
+                break;
+
+            default:
+                throw new \Exception("نوع الملف غير مدعوم.");
+        }
+
+        // المسار الكامل حيث سيتم تخزين الملف
+        $destinationFolder = "/home/u943485201/domains/aquan.website/public_html/aquan_api/public/{$folder}/{$user->id}/";
+
+        // التأكد من أن المجلد موجود، وإذا لم يكن موجودًا نقوم بإنشائه
+        if (!File::exists($destinationFolder)) {
+            File::makeDirectory($destinationFolder, 0777, true, true);
+        }
+
+        // إضافة تسجيل للتحقق من المسار
+        Log::info("Destination folder: " . $destinationFolder);
+
         try {
-            //! نقل الصورة إلى المجلد المحدد
-            $image->move($destinationFolder, $imageName);
-            return env('APP_URL') . "/public/{$folder}/{$user->id}/" . $imageName;
+            // نقل الملف إلى المجلد المحدد
+            $file->move($destinationFolder, $fileName);
+            return env('APP_URL') . "/public/{$folder}/{$user->id}/" . $fileName;
         } catch (\Exception $e) {
-            return response()->json(
-                ['message' => 'فشل في نقل الصورة'],
-                500,
-            );
+            Log::error("Error uploading file: " . $e->getMessage());
+            throw new \Exception("فشل في رفع الملف: " . $e->getMessage());
         }
     }
+
     public static function updateImage(
         Request $request,
         $user,
@@ -62,7 +93,7 @@ class uploadImageHelper
                     "لم يتم العثور على الصورة: " . $oldImagePath,
                 );
             }
-            return self::uploadImage(
+            return self::uploadFile(
                 $request,
                 $user,
                 $folder,

@@ -9,13 +9,14 @@ return new class extends Migration
 
     public function up()
     {
-        Schema::create('privacy_settings', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        Schema::create(
+            'privacy_settings',
+            function (Blueprint $table) {
+                $table->id();
+                $table->timestamps();
+            },
+        );
     }
-
-
     public function down()
     {
         Schema::dropIfExists('privacy_settings');

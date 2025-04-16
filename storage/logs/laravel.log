@@ -2091,3 +2091,47 @@ Stack trace:
 [stacktrace]
 #0 {main}
 "} 
+[2025-04-06 03:29:54] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-10 05:16:06] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-12 06:44:55] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-12 19:06:46] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-12 19:13:04] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-13 11:38:37] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-14 04:26:03] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-14 04:27:34] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-14 04:36:50] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-14 04:37:01] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
+[2025-04-16 00:58:37] production.ERROR: Cannot declare class App\Models\UserPlan, because the name is already in use {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot declare class App\\Models\\UserPlan, because the name is already in use at /home/vboxuser/codes/laravel/green_file_api/app/Models/UserPlan.php:8)
+[stacktrace]
+#0 {main}
+"} 
