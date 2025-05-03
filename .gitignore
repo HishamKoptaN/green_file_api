@@ -19,3 +19,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Sensitive files
+# Add sensitive files or patterns here
+/config/secrets.php
+/config/api_keys.php
+*.pem
+*.key
