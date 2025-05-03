@@ -1,28 +1,29 @@
-# Ignore files and directories that should not be committed
-/.phpunit.cache
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-.env
-.env.backup
-.env.production
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
-auth.json
-npm-debug.log
-yarn-error.log
+    # Ignore files and directories that should not be committed
+    /.phpunit.cache
+    /node_modules
+    /public/build
+    /public/hot
+    /public/storage
+    /storage/*.key
+    /storage/*
+    .env
+    .env.backup
+    .env.production
+    .phpunit.result.cache
+    Homestead.json
+    Homestead.yaml
+    auth.json
+    npm-debug.log
+    yarn-error.log
 
-# IDE and editor-specific files
-/.fleet
-/.idea
-/.vscode
+    # IDE and editor-specific files
+    /.fleet
+    /.idea
+    /.vscode
 
-# Sensitive files
-# Add sensitive files or patterns here
-/config/secrets.php
-/config/api_keys.php
-*.pem
-*.key
+    # Sensitive files
+    # Add sensitive files or patterns here
+    /config/secrets.php
+    /config/api_keys.php
+    *.pem
+    *.key
