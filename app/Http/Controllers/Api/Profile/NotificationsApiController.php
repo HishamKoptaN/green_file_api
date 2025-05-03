@@ -52,29 +52,51 @@ class NotificationsApiController extends Controller
             );
         }
     }
-    public function get(Request $request)
-    {
+    public function get(
+        Request $request,
+    ) {
         $user = Auth::guard('sanctum')->user();
         $userId = $user->id;
-
         //! جلب الإشعارات
-        $notifications = NotificationModel::where('type', 'global')
-            ->orWhereHas('recipients', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
+        $notifications = NotificationModel::where(
+            'type',
+            'global',
+        )
+            ->orWhereHas(
+                'recipients',
+                function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                },
+            )
             ->latest()
-            ->paginate(10);
-
+            ->paginate(
+                10,
+            );
         //! حساب عدد الإشعارات غير المقروءة
-        $unreadCount = NotificationModel::whereHas('recipients', function ($query) use ($userId) {
-            $query->where('user_id', $userId)
-                ->where('is_read', 0); //! الإشعارات غير المقروءة فقط
-        })->count();
-
+        $unreadCount = NotificationModel::whereHas(
+            'recipients',
+            function ($query) use (
+                $userId,
+            ) {
+                $query->where(
+                    'user_id',
+                    $userId,
+                )
+                    ->where(
+                        'is_read',
+                        0,
+                    );
+            },
+        )->count();
         return successRes(
             [
-                'notifications' => paginateRes($notifications, NotificationResource::class, 'notifications'),
-                'unread_count' => $unreadCount, //! إضافة عدد الإشعارات غير المقروءة في الاستجابة
+                'notifications' => paginateRes(
+                    $notifications,
+                    NotificationResource::class,
+                    'notifications',
+                ),
+                'unread_count' => $unreadCount,
+                //! إضافة عدد الإشعارات غير المقروءة في الاستجابة
             ],
         );
     }
@@ -94,7 +116,6 @@ class NotificationsApiController extends Controller
     public function markAsRead($notificationId)
     {
         $user = Auth::guard('sanctum')->user();
-
         $notificationRecipient = NotificationRecipient::where('user_id', $user->id)
             ->where('notification_id', $notificationId)
             ->first();
@@ -104,7 +125,6 @@ class NotificationsApiController extends Controller
             $notificationRecipient->save();
             return successRes(['message' => 'Notification marked as read']);
         }
-
         return failureRes('Notification not found or already read', 404);
     }
 }

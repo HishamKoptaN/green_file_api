@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Social\PostsApiController;
 use App\Http\Controllers\Api\Social\CmntsApiController;
 use App\Http\Controllers\Api\Social\FriendshipsApiController;
 use App\Http\Controllers\Api\Social\FollowerApiController;
+use App\Http\Controllers\Api\Social\OccasionInterestApiController;
 //! freelanceFile
 use App\Http\Controllers\Api\FreelanceFile\Projects\ProjectsApiController;
 use App\Http\Controllers\Api\JobsApiController;
@@ -17,11 +18,35 @@ use App\Http\Controllers\Api\BusinessFile\NewsApiController;
 use App\Http\Controllers\Api\BusinessFile\CompanyPostsApiController;
 use App\Http\Controllers\Api\BusinessFile\OpinionPollsApiController;
 use App\Http\Controllers\Api\BusinessFile\ServicesApiController;
+use App\Http\Controllers\Api\BusinessFile\MissingServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\TrainingApiController;
 use App\Http\Controllers\Api\NotificationsApiController;
 use App\Http\Controllers\FirebaseNotificationController;
 use App\Http\Controllers\Api\Cvs\CvsApiController;
-
+use App\Http\Controllers\SpecializationsApiController;
+use App\Http\Controllers\Api\Chats\ChatsApiController;
+//! chats
+Route::get(
+    '/chats',
+    [
+        ChatsApiController::class,
+        'get',
+    ],
+);
+//! msgs
+Route::prefix('msgs')->controller(ChatsApiController::class)->group(
+    function () {
+        Route::get(
+            '{chat}',
+            'getMsgs',
+        );
+        Route::post(
+            'send',
+            'send',
+        );
+    },
+);
+//! cv
 Route::get(
     '/cv',
     [
@@ -36,7 +61,6 @@ Route::post(
         'updateCv',
     ],
 );
-
 Route::post(
     '/create-device-group',
     [
@@ -44,6 +68,7 @@ Route::post(
         'createDeviceGroup',
     ],
 );
+//! notifications
 Route::any(
     '/notifications',
     [
@@ -74,6 +99,13 @@ Route::any(
     ],
 );
 Route::post(
+    '/posts/draft',
+    [
+        PostsApiController::class,
+        'createDraft',
+    ],
+);
+Route::post(
     '/posts/share',
     [
         PostsApiController::class,
@@ -95,9 +127,15 @@ Route::post(
         'create',
     ],
 );
-
-
-
+//! posts
+Route::post(
+    'occasions/toggle-interest/{occasion}',
+    [
+        OccasionInterestApiController::class,
+        'toggleInterest',
+    ],
+);
+//! likes
 Route::any(
     '/likes/{id?}',
     [
@@ -105,6 +143,7 @@ Route::any(
         'handleReq',
     ],
 );
+//! cmnts
 Route::any(
     '/cmnts/{id?}',
     [
@@ -222,6 +261,28 @@ Route::get(
     [
         ServicesApiController::class,
         'search',
+    ],
+);
+//! missing-services
+Route::get(
+    '/missing-services/{id?}',
+    [
+        MissingServicesApiController::class,
+        'get',
+    ],
+);
+Route::post(
+    '/missing-services/{id?}',
+    [
+        MissingServicesApiController::class,
+        'create',
+    ],
+);
+Route::get(
+    '/specializations',
+    [
+        SpecializationsApiController::class,
+        'get',
     ],
 );
 //! training

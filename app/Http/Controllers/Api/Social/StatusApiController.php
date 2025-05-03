@@ -67,8 +67,6 @@ class StatusesApiController extends Controller
             );
         }
     }
-
-
     public function create(
         Request $request,
     ) {
@@ -79,9 +77,11 @@ class StatusesApiController extends Controller
             }
             $imagePath = $request->hasFile('image')
                 ?  uploadImageHelper::uploadFile(
-                    $request,
-                    $user,
-                    'statuses'
+                    request: $request,
+                    user: $user,
+                    folder: 'statuses',
+                    fieldName: 'image',
+
                 ) : null;
             $videoPath = $request->hasFile('video')
                 ?  uploadImageHelper::uploadFile(
@@ -90,12 +90,23 @@ class StatusesApiController extends Controller
                     folder: 'statuses',
                     fieldName: 'video',
                 ) : null;
+            $audioPath = $request->hasFile('audio')
+                ?  uploadImageHelper::uploadFile(
+                    request: $request,
+                    user:  $user,
+                    folder:  'statuses',
+                    fieldName: 'audio',
+                ) : null;
             $status = Status::create(
                 [
                     'user_id' => $user->id,
                     'content' => $request->filled('content') ? $request->content : null,
                     'image' => $imagePath,
                     'video' => $videoPath,
+                    'audio' => $audioPath,
+                    'font_family' => $request->filled('font_family') ? $request->font_family : null,
+                    'font_size' => $request->filled('font_size') ? $request->font_size : null,
+                    'font_color' => $request->filled('font_color') ? $request->font_color : null,
                 ],
             );
             return successRes(
@@ -107,5 +118,22 @@ class StatusesApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+    private function handleUpload(
+        $request,
+        $user,
+        $folder,
+        $field,
+        $fallback = null,
+    ) {
+        return $request->hasFile($field)
+            ? UploadImageHelper::uploadFile(
+                $request,
+                $user,
+                $folder,
+                $field,
+            )
+            : ($fallback ?? null
+            );
     }
 }

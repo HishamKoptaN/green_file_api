@@ -13,11 +13,11 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\NotificationSent::class => [
             \App\Listeners\SendNotificationListener::class,
         ],
-
+        \App\Events\PrivateMessageSent::class => [
+            \App\Listeners\SendPrivateMessageNotificationListener::class,
+        ],
     ];
-
     public function boot(): void {}
-
     public function shouldDiscoverEvents(): bool
     {
         return false;

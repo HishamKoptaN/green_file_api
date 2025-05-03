@@ -11,9 +11,9 @@ class Poll extends Model
         'question',
         'end_date',
     ];
-    public function post()
+    public function posts()
     {
-        return $this->morphOne(
+        return $this->morphMany(
             Post::class,
             'postable',
         );
@@ -24,5 +24,4 @@ class Poll extends Model
             PollOption::class,
         );
     }
-
 }

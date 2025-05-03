@@ -8,15 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::dropIfExists('posts');
-    }
-    public function up()
-    {
-        Schema::table(
-            'polls',
-            function (Blueprint $table) {
-                $table->timestamp('question')->nullable()->after('id');
-            },
-        );
+        Schema::table('msgs', function (Blueprint $table) {
+            $table->timestamp('read_at')->nullable()->after('video');
+        });
     }
 };

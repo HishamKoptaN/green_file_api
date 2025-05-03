@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use App\Http\Resources\User\OpportunityLookingResource;
 use App\Models\User\OpportunityLooking;
 
 class OpportunityLookingController extends Controller

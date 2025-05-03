@@ -52,18 +52,14 @@ class uploadImageHelper
             default:
                 throw new \Exception("نوع الملف غير مدعوم.");
         }
-
         // المسار الكامل حيث سيتم تخزين الملف
         $destinationFolder = "/home/u943485201/domains/aquan.website/public_html/aquan_api/public/{$folder}/{$user->id}/";
-
         // التأكد من أن المجلد موجود، وإذا لم يكن موجودًا نقوم بإنشائه
         if (!File::exists($destinationFolder)) {
             File::makeDirectory($destinationFolder, 0777, true, true);
         }
-
         // إضافة تسجيل للتحقق من المسار
         Log::info("Destination folder: " . $destinationFolder);
-
         try {
             // نقل الملف إلى المجلد المحدد
             $file->move($destinationFolder, $fileName);

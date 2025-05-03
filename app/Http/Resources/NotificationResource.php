@@ -8,14 +8,18 @@ use Carbon\Carbon;
 
 class NotificationResource extends JsonResource
 {
-    public function toArray($request)
-    {
+    public function toArray(
+        $request,
+    ) {
         return [
             'id' => $this->id,
             'title' => $this->title,
             'body' => $this->body,
             'image' => $this->image,
-            'data' => json_decode($this->data, true),
+            'data' => json_decode(
+                $this->data,
+                true,
+            ),
             'created_at' => Carbon::parse($this->created_at)->diffForHumans(),
             'is_read' => $this->whenPivotLoaded(
                 'notification_recipients',

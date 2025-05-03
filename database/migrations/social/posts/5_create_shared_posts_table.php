@@ -22,7 +22,7 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists(
-            'post_shares',
+            'shared_posts',
         );
     }
 };

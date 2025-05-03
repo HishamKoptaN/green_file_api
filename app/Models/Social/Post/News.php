@@ -12,11 +12,8 @@ class News extends Model
         'video',
         'pdf',
     ];
-    public function post()
+    public function posts()
     {
-        return $this->morphOne(
-            Post::class,
-            'postable',
-        );
+        return $this->morphMany(Post::class, 'postable');
     }
 }

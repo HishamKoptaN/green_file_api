@@ -10,12 +10,18 @@ class SharedPost extends Model
         'post_id',
         'content',
     ];
+    public function postable()
+    {
+        return $this->morphOne(Post::class, 'postable');
+    }
+    // العلاقة التي تربط هذا المنشور بالمنشورات المرتبطة به
     public function posts()
     {
-        return $this->morphMany(
-            Post::class,
-            'postable',
-        );
+        return $this->morphMany(Post::class, 'postable');
+    }
+    // العلاقة التي تربط المنشور الأصلي بالـ SharedPost
+    public function post()
+    {
+        return $this->belongsTo(Post::class, 'post_id');
     }
 }
-

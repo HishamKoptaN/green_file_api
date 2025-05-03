@@ -13,11 +13,8 @@ class Draft extends Model
         'video',
         'pdf',
     ];
-    public function post()
-    {
-        return $this->morphOne(
-            Post::class,
-            'postable',
-        );
-    }
+    public function posts()
+{
+    return $this->morphMany(Post::class, 'postable');
+}
 }

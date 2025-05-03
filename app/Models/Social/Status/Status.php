@@ -15,6 +15,10 @@ class Status extends Model
         'content',
         'image',
         'video',
+        'audio',
+        'font_family',
+        'font_size',
+        'font_color',
         'time',
     ];
     public function user()

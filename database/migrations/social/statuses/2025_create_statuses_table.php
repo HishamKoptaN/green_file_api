@@ -15,8 +15,12 @@ return new class extends Migration
             ) {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-                $table->text('content')->nullable();
+
                 $table->string('image')->nullable();
+                $table->text('content')->nullable();
+                $table->text('font_size')->nullable();
+                $table->text('font_color')->nullable();
+                $table->text('font_family')->nullable();
                 $table->string('video')->nullable();
                 $table->string('time')->nullable();
                 $table->timestamps();

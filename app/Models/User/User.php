@@ -14,10 +14,9 @@ use App\Models\Social\Status\Status;
 use App\Models\Course\Course;
 use App\Models\Course\CourseRating;
 use App\Models\Power\Role;
-use App\Models\Social\Follower;
+use App\Models\Social\Post\Occasion;
 use App\Models\Cvs\Cv;
 use App\Models\Social\Friendship;
-
 
 class User extends Authenticatable
 {
@@ -35,6 +34,10 @@ class User extends Authenticatable
     protected $casts = [
         'status' => 'boolean',
     ];
+    public function posts()
+    {
+        return $this->morphMany(Post::class, 'postable');
+    }
     public function userable()
     {
         return $this->morphTo();
@@ -56,6 +59,25 @@ class User extends Authenticatable
             'followed_id',
         );
     }
+    public function interestedOccasions()
+    {
+        return $this->belongsToMany(
+            \App\Models\Social\Post\Occasion::class,
+            'occasion_user', // اسم جدول الربط
+            'user_id',
+            'occasion_id'
+        );
+    }
+
+    public function isInterestedIn(Occasion $occasion): bool
+    {
+        return $this->interestedOccasions()
+            ->where(
+                'occasion_id',
+                $occasion->id,
+            )
+            ->exists();
+    }
     public function friendships()
     {
         return $this->hasMany(
@@ -69,10 +91,6 @@ class User extends Authenticatable
     public function statuses()
     {
         return $this->hasMany(Status::class);
-    }
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
     }
     public function opportunityLookings()
     {

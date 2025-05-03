@@ -6,23 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\social\post\PostFactory;
 use App\Models\User\User;
-use App\Models\Social\Post\Poll;
-use App\Models\Social\Post\Event;
-
 class Post extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
         'publish_at',
-        'commentable_id',
-        'commentable_type',
+        'postable_type',
+        'postable_id',
     ];
+    protected $with = ['postable'];
 
     //! Relations
     public function postable()
     {
         return $this->morphTo();
+    }
+    public function sharedPosts()
+    {
+        return $this->hasMany(SharedPost::class, 'post_id');
     }
     public function user()
     {
@@ -30,6 +32,11 @@ class Post extends Model
             User::class,
         );
     }
+    public function shares()
+    {
+        return $this->hasMany(SharedPost::class, 'post_id');
+    }
+
     public function comments()
     {
         return $this->morphMany(
@@ -44,6 +51,7 @@ class Post extends Model
             'likeable',
         );
     }
+    //! end
     protected static function newFactory()
     {
         return PostFactory::new();
@@ -62,10 +70,6 @@ class Post extends Model
     public function sharedByUsers()
     {
         return $this->belongsToMany(User::class, 'post_shares')->withTimestamps();
-    }
-    public function shares()
-    {
-        return $this->hasMany(Post::class, 'original_post_id');
     }
     public function scopePublished(
         $query,
@@ -111,6 +115,7 @@ class Post extends Model
             'social',
         );
     }
+
     public function getPostTypeAttribute()
     {
         return class_basename(

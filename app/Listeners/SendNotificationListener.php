@@ -23,7 +23,6 @@ class SendNotificationListener
         $tokens = UserDeviceToken::where('user_id', $event->userId)
             ->pluck('device_token')
             ->toArray();
-
         try {
             //! تهيئة Firebase
             $messaging = (new Factory)
