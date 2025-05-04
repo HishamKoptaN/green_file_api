@@ -9,17 +9,14 @@ class ResetAll extends Command
 {
     protected $signature = 'reset:all';
     protected $description = 'Drop all tables and run all migrations (including subdirectories)';
-
     public function handle()
     {
         $this->info('🚨 Dropping all tables...');
         Artisan::call('db:wipe', ['--force' => true]);
         $this->info(Artisan::output());
-
         $this->info('🚀 Running all migrations...');
         Artisan::call('migrate', ['--force' => true]);
         $this->info(Artisan::output());
-
         $folders = [
 
             'database/migrations/businessFile',
@@ -35,13 +32,11 @@ class ResetAll extends Command
             'database/migrations/social/statuses',
             'database/migrations/users',
         ];
-
         foreach ($folders as $folder) {
             $this->info("📂 Running migrations for: $folder");
             Artisan::call('migrate', ['--path' => $folder, '--force' => true]);
             $this->info(Artisan::output());
         }
-
         $this->info('✅ All migrations completed successfully!');
     }
 }

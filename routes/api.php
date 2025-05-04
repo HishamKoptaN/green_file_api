@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Api\Profile\ProfileApiController;
@@ -21,26 +20,20 @@ use App\Http\Controllers\Api\BusinessFile\OpinionPollsApiController;
 use App\Http\Controllers\Api\BusinessFile\ServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\MissingServicesApiController;
 use App\Http\Controllers\Api\BusinessFile\TrainingApiController;
-use App\Http\Controllers\Api\NotificationsApiController;
+use App\Http\Controllers\Api\Profile\NotificationsApiController;
 use App\Http\Controllers\FirebaseNotificationController;
 use App\Http\Controllers\Api\Cvs\CvsApiController;
 use App\Http\Controllers\SpecializationsApiController;
 use App\Http\Controllers\Api\Chats\ChatsApiController;
+use App\Http\Controllers\CloudnaryController;
 
-
-Route::get('/run-artisan', function () {
-    Artisan::call('route:clear');
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('optimize:clear');
-    Artisan::call('view:clear');
-    Artisan::call('config:cache');
-    Artisan::call('route:cache');
-
-    return response('<pre>' . Artisan::output() . '</pre>');
-});
-
-
+Route::post(
+    '/cloudinary',
+    [
+        CloudnaryController::class,
+        'uploadImage',
+    ],
+);
 //! chats
 Route::get(
     '/chats',
@@ -312,6 +305,6 @@ Route::any(
 Route::get(
     '/test',
     function () {
-        return "test api";
+        return "api route connected successfully";
     },
 );
