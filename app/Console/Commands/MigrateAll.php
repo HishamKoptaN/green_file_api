@@ -21,19 +21,19 @@ class ResetAll extends Command
         $this->info(Artisan::output());
 
         $folders = [
-            'database/migrations/locations',
-            'database/migrations/users',
-            'database/migrations/powers',
-            'database/migrations/jobs',
-            'database/migrations/skills',
-            'database/migrations/courses',
-            'database/migrations/projects',
-            'database/migrations/social/statuses',
-            'database/migrations/social/posts',
-            'database/migrations/freelanceFile',
-            'database/migrations/freelanceFile/projects',
+
             'database/migrations/businessFile',
-            'database/migrations/businessFile/opinionPolls',
+            'database/migrations/chats',
+            'database/migrations/courses',
+            'database/migrations/cvs',
+            'database/migrations/freelanceFile/projects',
+            'database/migrations/jobs',
+            'database/migrations/locations',
+            'database/migrations/notifications',
+            'database/migrations/powers',
+            'database/migrations/social/posts',
+            'database/migrations/social/statuses',
+            'database/migrations/users',
         ];
 
         foreach ($folders as $folder) {

@@ -1,18 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Artisan;
 
-Route::get(
-    '/artisan-optimize',
-    [
-        App\Http\Controllers\ArtisanController::class,
-        'optimize',
-    ],
-);
-Route::get(
-    '/optimize',
-    function () {
+class ArtisanController extends Controller
+{
+    public function optimize()
+    {
         Artisan::call('config:cache');
         Artisan::call('route:cache');
         Artisan::call('optimize');
@@ -22,6 +17,6 @@ Route::get(
         Artisan::call('optimize:clear');
         Artisan::call('composer dump-autoload');
 
-        return 'تم تنفيذ الأوامر بنجاح';
-    },
-);
+        return response()->json(['message' => 'تم تنفيذ الأوامر بنجاح']);
+    }
+}
