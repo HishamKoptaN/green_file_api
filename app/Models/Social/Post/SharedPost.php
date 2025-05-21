@@ -3,9 +3,11 @@
 namespace App\Models\Social\Post;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SharedPost extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'post_id',
         'content',

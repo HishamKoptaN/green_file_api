@@ -2,14 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SignUpController;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\SignInController;
 use App\Http\Controllers\Auth\CheckController;
 use App\Http\Controllers\Api\OpportunityLookingController;
 
 Route::post(
     '/auth-token',
     [
-        LoginController::class,
+        SignInController::class,
         'authToken',
     ],
 );

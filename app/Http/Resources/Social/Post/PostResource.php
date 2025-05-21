@@ -5,6 +5,9 @@ namespace App\Http\Resources\Social\Post;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User\Company;
+use App\Models\Social\Post\Comment;
+use App\Models\Social\Post\Post;
+use App\Models\Social\Post\Poll;
 use Carbon\Carbon;
 
 class PostResource extends JsonResource
@@ -14,35 +17,42 @@ class PostResource extends JsonResource
     ) {
         $postArray = [
             'id' => $this->id,
-            'type' => $this->getPostType(),
+            'type' => $this->postable_type,
             'post_owner' => $this->getPostOwnerDetails($this->user),
             'likes_count' => $this->likes()->count(),
             'is_like' => $this->isLikedByUser(),
-            'comments_count' => $this->comments()->count(),
             'shares_count' => $this->shares()->count(),
             'postable' => new PostableResource(
                 $this->whenLoaded(
                     'postable',
                 ),
             ),
+            'cmnts_count' => Comment::where('commentable_id', $this->id)
+                ->where('commentable_type', Post::class)
+                ->count(),
+            'cmnters_images' => Comment::where('commentable_id', $this->id)
+                ->where('commentable_type', Post::class)
+                ->with('user.userable') // تحميل العلاقة للوصول للصورة
+                ->latest()
+                ->take(10) // زوّد العدد قليلًا حتى تضمن تنوع المستخدمين
+                ->get()
+                ->map(function ($comment) {
+                    $user = $comment->user;
+                    return [
+                        'id' => $user->id,
+                        'image' => optional($user->userable)->image,
+                    ];
+                })
+                ->unique('id')
+                ->pluck('image')
+                ->filter()
+                ->values(),
+
             'created_at' => $this->created_at->diffForHumans(),
-            'publish_at' => $this->publish_at,
+            'publish_at' => $this->publish_at->diffForHumans(),
         ];
         return $postArray;
     }
-    private function getPostType()
-    {
-        return match (get_class($this->postable)) {
-            \App\Models\Social\Post\Occasion::class => 'occasion',
-            \App\Models\Social\Post\Poll::class => 'poll',
-            \App\Models\Social\Post\SharedPost::class => 'sharedPost',
-            \App\Models\Social\Post\CompanyPost::class => 'companyPost',
-            \App\Models\Social\Post\News::class => 'news',
-            \App\Models\Social\Post\SocialPost::class => 'socialPost',
-            default => 'socialPost',
-        };
-    }
-
     private function getPostOwnerDetails($user)
     {
         $authUser = Auth::guard('sanctum')->user();
@@ -86,23 +96,33 @@ class PostableResource extends JsonResource
             \App\Models\Social\Post\Occasion::class => new OccasionResource($this),
             \App\Models\Social\Post\Poll::class => new PollResource($this),
             \App\Models\Social\Post\Draft::class => new CustomPostResource($this),
-            \App\Models\Social\Post\CompanyPost::class => new PollResource($this),
+            \App\Models\Social\Post\CompanyPost::class => new CustomPostResource($this),
             \App\Models\Social\Post\News::class => new CustomPostResource($this),
+            \App\Models\Social\Post\ServiceRequest::class => new ServiceRequestResource($this),
             default => new CustomPostResource($this),
         };
     }
 }
+
 class SharedPostResource extends JsonResource
 {
     public function toArray(
         $request,
     ) {
-        $sharedPost = \App\Models\Social\Post\Post::find($this->post_id);
+
+        $sharedPost = Post::with('postable')->find(
+            $this->post_id,
+        );
+        if ($sharedPost->postable instanceof Poll) {
+            $sharedPost->postable->load('options');
+        }
         $postArray = [
             'id' => $this->id,
-            'type' =>  'sharedPost',
+            'type' => $this->type,
             'post_owner' => $this->getPostOwnerDetails($this->user),
-            'shared_sost' => new PostResource($sharedPost),
+            'shared_post' => new PostResource(
+                $sharedPost,
+            ),
             'created_at' => $this->created_at->diffForHumans(),
             'publish_at' => $this->publish_at,
         ];
@@ -151,7 +171,6 @@ class CustomPostResource extends JsonResource
 }
 class OccasionResource extends JsonResource
 {
-
     public function toArray($request)
     {
         // الحصول على المستخدم المسجل
@@ -167,21 +186,41 @@ class OccasionResource extends JsonResource
             'description' => $occasion->description,
             'interested_count' => $occasion->interested_count,
             'is_interested' => $isInterested,
+            'start_at' => Carbon::parse($occasion->start_at)->locale('ar')->translatedFormat('d F, Y g:i A'),
             'end_at' => Carbon::parse($occasion->end_at)->locale('ar')->translatedFormat('d F, Y g:i A'),
         ];
     }
 }
 
-
 class PollResource extends JsonResource
 {
-    public function toArray($request)
-    {
+    public function toArray(
+        $request,
+    ) {
+        $user = Auth::user();
+        $selectedOptionId = $this->options()
+            ->whereHas('votes', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->pluck('id')
+            ->first();
+       $this->when(
+            $this->type === 'poll', // تحقق من نوع المنشور
+            function () {
+                return PollOptionResource::collection($this->whenLoaded('options'));
+            },
+            []
+        );
         return [
             'id' => $this->id,
             'status' => $this->status,
-            'question' => $this->content,
-            'options' => PollOptionResource::collection($this->whenLoaded('options')),
+            'question' => $this->question,
+            'options' => PollOptionResource::collection(
+                $this->whenLoaded(
+                    'options',
+                ),
+            ),
+            'selected_option' => $selectedOptionId,
             'end_at' => $this->end_at,
         ];
     }
@@ -194,11 +233,22 @@ class PollOptionResource extends JsonResource
         return [
             'id' => $this->id,
             'option' => $this->option,
-            'votes_count' => $this->votes_count,
+            'votes_count' => $this->votes,
         ];
     }
 }
-
+class ServiceRequestResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'specialization_id' => $this->specialization_id,
+            'details' => $this->details,
+        ];
+    }
+}
 class UserDetailResource extends JsonResource
 {
     public function toArray($request)

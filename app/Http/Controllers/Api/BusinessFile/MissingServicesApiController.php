@@ -59,28 +59,5 @@ class MissingServicesApiController extends Controller
             );
         }
     }
-    public function create(
-        Request $request,
-    ) {
-        try {
-            $missingService = MissingService::create(
-                [
-                    'user_id' => Auth::guard('sanctum')->user()->id,
-                    'title' => $request->title,
-                    'specialization_id' => $request->specialization_id,
-                    'details' => $request->details,
-                ],
-            );
-            return successRes(
-                new MissingServiceResource(
-                    $missingService->fresh(),
-                ),
-                201
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+   
 }

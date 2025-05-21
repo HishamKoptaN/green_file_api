@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Cmnt;
+namespace App\Http\Resources\Social\Cmnts;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Social\Post\PostResource;

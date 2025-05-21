@@ -1,6 +1,6 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Api\Profile\ProfileApiController;
 //! social
 use App\Http\Controllers\Api\Social\LikeApiController;
@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Social\CmntsApiController;
 use App\Http\Controllers\Api\Social\FriendshipsApiController;
 use App\Http\Controllers\Api\Social\FollowerApiController;
 use App\Http\Controllers\Api\Social\OccasionInterestApiController;
+use App\Http\Controllers\Api\Social\PollsApiController;
 //! freelanceFile
 use App\Http\Controllers\Api\FreelanceFile\Projects\ProjectsApiController;
 use App\Http\Controllers\Api\JobsApiController;
@@ -25,14 +26,26 @@ use App\Http\Controllers\FirebaseNotificationController;
 use App\Http\Controllers\Api\Cvs\CvsApiController;
 use App\Http\Controllers\SpecializationsApiController;
 use App\Http\Controllers\Api\Chats\ChatsApiController;
-use App\Http\Controllers\CloudnaryController;
-
+use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 Route::post(
-    '/cloudinary',
-    [
-        CloudnaryController::class,
-        'uploadImage',
-    ],
+    '/image',
+    function (
+        Request $request,
+    ) {
+        $result = Cloudinary::upload($request->file(
+            'image',
+        )->getRealPath());
+        $uploadedFileUrl = $result->getSecurePath();
+        $publicId = $result->getPublicId();
+        return response()->json(
+            [
+                'message' => 'Image uploaded successfully',
+                'url' => $uploadedFileUrl,
+                'public_id' => $publicId,
+            ],
+        );
+    },
 );
 //! chats
 Route::get(
@@ -136,12 +149,54 @@ Route::post(
         'create',
     ],
 );
+//! delete post
+Route::delete(
+    'posts/{id}',
+    [
+        PostsApiController::class,
+        'delete',
+    ],
+);
+//! delete post
+Route::post(
+    '/votes',
+    [
+        PollsApiController::class,
+        'vote',
+    ],
+);
+
+
+
+
+
+
+
+
+
 //! posts
 Route::post(
     'occasions/toggle-interest/{occasion}',
     [
         OccasionInterestApiController::class,
         'toggleInterest',
+    ],
+);
+
+
+//! missing-services
+Route::get(
+    '/missing-services/{id?}',
+    [
+        MissingServicesApiController::class,
+        'get',
+    ],
+);
+Route::post(
+    '/missing-services/{id?}',
+    [
+        MissingServicesApiController::class,
+        'create',
     ],
 );
 //! likes
@@ -272,21 +327,7 @@ Route::get(
         'search',
     ],
 );
-//! missing-services
-Route::get(
-    '/missing-services/{id?}',
-    [
-        MissingServicesApiController::class,
-        'get',
-    ],
-);
-Route::post(
-    '/missing-services/{id?}',
-    [
-        MissingServicesApiController::class,
-        'create',
-    ],
-);
+
 Route::get(
     '/specializations',
     [

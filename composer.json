@@ -43,9 +43,6 @@
             "app/Helpers/uploadImageHelper.php",
             "app/Helpers/updateImageHelper.php",
             "app/Helpers/NotificationHelper.php"
-
-
-
         ]
     },
     "autoload-dev": {

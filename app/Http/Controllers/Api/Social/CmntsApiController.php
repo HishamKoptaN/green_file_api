@@ -27,12 +27,18 @@ class CmntsApiController extends Controller
                     $request,
                 );
             default:
-                return response()->json(['error' => 'Method Not Allowed'], 405);
+                return response()->json(
+                    [
+                        'error' => 'Method Not Allowed',
+                    ],
+                    405,
+                );
         }
     }
 
-    public function get($id)
-    {
+    public function get(
+        $id,
+    ) {
         try {
             if (!$id) {
                 return response()->json([
@@ -45,19 +51,33 @@ class CmntsApiController extends Controller
                     'error' => 'Post not found',
                 ], 404);
             }
-            $comments = Comment::where('commentable_id', $id)
-                ->where('commentable_type', Post::class)
+            $comments = Comment::where(
+                'commentable_id',
+                $id,
+            )
+                ->where(
+                    'commentable_type',
+                    Post::class,
+                )
                 ->latest()
                 ->paginate(20);
-
-            return successRes(paginateRes($comments, CmntResource::class, 'cmnts'));
+            return successRes(
+                paginateRes(
+                    $comments,
+                    CmntResource::class,
+                    'cmnts',
+                ),
+            );
         } catch (\Exception $e) {
-            return failureRes($e->getMessage());
+            return failureRes(
+                $e->getMessage(),
+            );
         }
     }
 
-    public function create(Request $request)
-    {
+    public function create(
+        Request $request,
+    ) {
         try {
             $user = Auth::guard('sanctum')->user();
             if (!$user) {

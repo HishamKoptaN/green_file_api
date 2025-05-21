@@ -6,17 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\social\post\PostFactory;
 use App\Models\User\User;
+use Carbon\Carbon;
+
 class Post extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'publish_at',
         'postable_type',
         'postable_id',
+        'publish_at',
+        'created_at',
     ];
-    protected $with = ['postable'];
+    protected $with = [
+        'postable',
+    ];
+    protected $dates = ['publish_at'];
 
+    // أو يمكنك استخدام accessor إذا كنت ترغب في إجراء بعض المعالجة الإضافية:
+    public function getPublishAtAttribute($value)
+    {
+        return Carbon::parse($value);
+    }
     //! Relations
     public function postable()
     {
@@ -24,7 +35,10 @@ class Post extends Model
     }
     public function sharedPosts()
     {
-        return $this->hasMany(SharedPost::class, 'post_id');
+        return $this->hasMany(
+            SharedPost::class,
+            'post_id',
+        );
     }
     public function user()
     {
@@ -51,7 +65,6 @@ class Post extends Model
             'likeable',
         );
     }
-    //! end
     protected static function newFactory()
     {
         return PostFactory::new();

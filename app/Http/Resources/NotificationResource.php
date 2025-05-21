@@ -21,12 +21,14 @@ class NotificationResource extends JsonResource
                 true,
             ),
             'created_at' => Carbon::parse($this->created_at)->diffForHumans(),
-            'is_read' => $this->whenPivotLoaded(
-                'notification_recipients',
-                function () {
-                    return (bool) $this->pivot->is_read;
-                }
-            ),
+            'is_read' => true
+            // $this->whenPivotLoaded(
+            //     'notification_recipients',
+            //     function () {
+            //         return (bool) $this->pivot->is_read;
+            //     }
+            // )
+            ,
             'read_at' => $this->whenPivotLoaded(
                 'notification_recipients',
                 function () {

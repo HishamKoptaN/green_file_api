@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class ResetAll extends Command
+class MigrateAll extends Command
 {
     protected $signature = 'reset:all';
     protected $description = 'Drop all tables and run all migrations (including subdirectories)';

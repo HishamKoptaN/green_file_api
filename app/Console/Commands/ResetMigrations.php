@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class ResetAndSeed extends Command
+class ResetMigrations extends Command
 {
     protected $signature = 'reset:all';
     protected $description = 'Drop all tables, run migrations from specific folders, then run seeders';

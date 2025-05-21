@@ -98,70 +98,87 @@ class SignUpController extends Controller
         }
     }
 
-    public function jobSeekerSignUp(Request $request, $firebaseUid)
-    {
-        try {
-            return DB::transaction(function () use ($request, $firebaseUid) {
-                $opportunityLooking = OpportunityLooking::create([
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'phone' => $request->phone,
-                    'job_title' => 'المسمي الوظيفي',
-                    'image' => env('APP_URL') . '/public/media/profile/opportunity_lookings/defalut.png',
-                ]);
-
-                $user = User::create([
-                    'firebase_uid' => $firebaseUid,
-                    'userable_id' => $opportunityLooking->id,
-                    'userable_type' => OpportunityLooking::class,
-                ]);
-
-                $user->assignRole('opportunity_looking');
-                $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
-
-                return successRes([
-                    'token' => $token,
-                    'role' => $user->getRoleNames()->first(),
-                    'user' => new UserResource($user),
-                ]);
-            });
-        } catch (\Exception $e) {
-            return failureRes($e->getMessage());
-        }
-    }
-
-    public function companySignUp(Request $request, $firebaseUid)
-    {
+    public function jobSeekerSignUp(
+        Request $request,
+        $firebaseUid,
+    ) {
         try {
             return DB::transaction(
                 function () use ($request, $firebaseUid) {
-                    $company = Company::create([
-                        'name' => $request->name,
-                        'job_title' => 'شركة مختصة بمجال',
-                        'phone' => $request->phone,
-                        'country_id' => $request->country_id,
-                        'city_id' => $request->city_id,
-                        'image' => env('APP_URL') . '/public/media/profile/companies/defalut.png',
-                    ]);
-
-                    $user = User::create([
-                        'firebase_uid' => $firebaseUid,
-                        'userable_id' => $company->id,
-                        'userable_type' => Company::class,
-                    ]);
-
-                    $user->assignRole('company');
+                    $opportunityLooking = OpportunityLooking::create(
+                        [
+                            'first_name' => $request->first_name,
+                            'last_name' => $request->last_name,
+                            'phone' => $request->phone,
+                            'job_title' => 'المسمي الوظيفي',
+                            'image' => 'https://res.cloudinary.com/dqzu6ln2h/image/upload/v1746431176/defalut_ulttwv.png',
+                        ],
+                    );
+                    $user = User::create(
+                        [
+                            'firebase_uid' => $firebaseUid,
+                            'userable_id' => $opportunityLooking->id,
+                            'userable_type' => OpportunityLooking::class,
+                        ],
+                    );
+                    $user->assignRole('opportunity_looking');
                     $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
-
-                    return successRes([
-                        'token' => $token,
-                        'role' => $user->getRoleNames()->first(),
-                        'user' => new UserResource($user),
-                    ]);
+                    return successRes(
+                        [
+                            'token' => $token,
+                            'role' => $user->getRoleNames()->first(),
+                            'user' => new UserResource($user),
+                        ],
+                    );
                 },
             );
         } catch (\Exception $e) {
-            return failureRes($e->getMessage());
+            return failureRes(
+                $e->getMessage(),
+            );
+        }
+    }
+    public function companySignUp(
+        Request $request,
+        $firebaseUid,
+    ) {
+        try {
+            return DB::transaction(
+                function () use ($request, $firebaseUid) {
+                    $company = Company::create(
+                        [
+                            'name' => $request->name,
+                            'job_title' => 'شركة مختصة بمجال',
+                            'phone' => $request->phone,
+                            'country_id' => $request->country_id,
+                            'city_id' => $request->city_id,
+                            'image' => 'https://res.cloudinary.com/dqzu6ln2h/image/upload/v1746693531/defalut_company_image_spwwqb.png',
+                        ],
+                    );
+                    $user = User::create(
+                        [
+                            'firebase_uid' => $firebaseUid,
+                            'userable_id' => $company->id,
+                            'userable_type' => Company::class,
+                        ],
+                    );
+                    $user->assignRole('company');
+                    $token = $user->createToken("auth", ['*'], now()->addWeek())->plainTextToken;
+                    return successRes(
+                        [
+                            'token' => $token,
+                            'role' => $user->getRoleNames()->first(),
+                            'user' => new UserResource(
+                                $user,
+                            ),
+                        ],
+                    );
+                },
+            );
+        } catch (\Exception $e) {
+            return failureRes(
+                $e->getMessage(),
+            );
         }
     }
 }

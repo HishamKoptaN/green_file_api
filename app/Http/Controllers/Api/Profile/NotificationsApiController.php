@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\Profile;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -8,6 +9,7 @@ use App\Http\Resources\NotificationResource;
 use App\Models\Notification\Notification as NotificationModel;
 use App\Models\Notification\NotificationRecipient;
 use App\Events\NotificationSent;
+use App\Events\PrivateMessageSent;
 
 class NotificationsApiController extends Controller
 {

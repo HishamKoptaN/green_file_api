@@ -47,9 +47,8 @@ class StatusFactory extends Factory
                 ],
             ) ? $this->faker->randomElement(
                 [
-                    env('APP_URL') . '/public/media/statuses/1.png',
-                    env('APP_URL') . '/public/media/statuses/2.png',
-                    env('APP_URL') . '/public//mediastatuses/3.png',
+                    'https://res.cloudinary.com/dqzu6ln2h/image/upload/v1741171124/samples/balloons.jpg',
+                    'https://res.cloudinary.com/dqzu6ln2h/image/upload/v1741171126/samples/cup-on-a-table.jpg',
                 ],
             ) : null,
             'video' => in_array(
@@ -60,9 +59,8 @@ class StatusFactory extends Factory
                 ],
             ) ? $this->faker->randomElement(
                 [
-                    'https://youtu.be/AzCIKEXLteY',
-                    'https://www.youtube.com/shorts/zNAi-vocJ6k?feature=share',
-                    'https://www.youtube.com/shorts/2wKyd9waGP4?feature=share',
+                    'https://player.cloudinary.com/embed/?cloud_name=dqzu6ln2h&public_id=samples%2Fsea-turtle&profile=cld-default',
+                    'https://player.cloudinary.com/embed/?cloud_name=dqzu6ln2h&public_id=samples%2Felephants&profile=cld-default',
                 ],
             ) : null,
             'created_at' => now(),

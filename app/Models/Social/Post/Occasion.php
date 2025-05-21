@@ -1,9 +1,14 @@
 <?php
 
 namespace App\Models\Social\Post;
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\social\post\OccasionFactory;
+
 class Occasion extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'image',
         'title',
@@ -11,6 +16,7 @@ class Occasion extends Model
         'link',
         'start_at',
         'end_at',
+
     ];
     public function posts()
     {
@@ -32,5 +38,11 @@ class Occasion extends Model
     public function getInterestedCountAttribute()
     {
         return $this->interestedUsers()->count();
+    }
+
+
+    protected static function newFactory()
+    {
+        return OccasionFactory::new();
     }
 }
