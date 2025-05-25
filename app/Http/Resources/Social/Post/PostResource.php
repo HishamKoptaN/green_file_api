@@ -222,6 +222,7 @@ class PollResource extends JsonResource
             ),
             'selected_option' => $selectedOptionId,
             'end_at' => $this->end_at,
+            'is_ended' => now()->greaterThan($this->end_at),
         ];
     }
 }

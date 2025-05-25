@@ -11,12 +11,15 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Social\Post\Post;
 use App\Models\Social\Status\Status;
+use App\Models\Social\Status\StatusComment;
+use App\Models\Social\Status\Statuslke;
 use App\Models\Course\Course;
 use App\Models\Course\CourseRating;
 use App\Models\Power\Role;
 use App\Models\Social\Post\Occasion;
 use App\Models\Cvs\Cv;
 use App\Models\Social\Friendship;
+use App\Models\Social\Status\StatusView;
 
 class User extends Authenticatable
 {
@@ -34,6 +37,16 @@ class User extends Authenticatable
     protected $casts = [
         'status' => 'boolean',
     ];
+    public function likedStatuses()
+{
+    return $this->hasMany(StatusLike::class);
+}
+
+public function statusComments()
+{
+    return $this->hasMany(StatusComment::class);
+}
+
     public function posts()
     {
         return $this->morphMany(Post::class, 'postable');
@@ -109,6 +122,10 @@ class User extends Authenticatable
             'followed_id',
             'follower_id',
         );
+    }
+    public function statusViews()
+    {
+        return $this->hasMany(StatusView::class);
     }
     public function follow($id)
     {

@@ -10,11 +10,11 @@ class UserStatusResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'user_id' => $this->id,
             'status_owner' => $this->getStatusOwnerDetails(),
             'statuses' => StatusResource::collection($this->statuses),
         ];
     }
-
     private function getStatusOwnerDetails()
     {
         $owner = optional($this->userable);

@@ -16,6 +16,7 @@ use App\Models\Social\Post\ServiceRequest;
 use App\Models\Social\Post\SharedPost;
 use App\Models\Social\Post\Poll;
 use App\Models\Social\Post\SocialPost;
+use Carbon\Carbon;
 
 class PostsApiController extends Controller
 {
@@ -99,6 +100,9 @@ class PostsApiController extends Controller
             // تحديد وقت النشر
             $publishAt = $request->filled('publish_at') ? $request->input('publish_at') : now();
             // إنشاء المنشور داخل transaction
+            if ($request->filled('publish_at') && Carbon::parse($request->publish_at)->isPast()) {
+                return failureRes("لا يمكن تحديد وقت نشر في الماضي");
+            }
             $post = DB::transaction(
                 function () use (
                     $request,
@@ -250,7 +254,9 @@ class PostsApiController extends Controller
             ],
         );
         foreach ($pollData['options'] ?? [] as $option) {
-            $poll->options()->create(['option' => $option]);
+            if (!empty($option)) {
+                $poll->options()->create(['option' => $option]);
+            }
         }
         return $poll;
     }

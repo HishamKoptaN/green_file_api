@@ -28,14 +28,17 @@ use App\Http\Controllers\SpecializationsApiController;
 use App\Http\Controllers\Api\Chats\ChatsApiController;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 Route::post(
     '/image',
     function (
         Request $request,
     ) {
-        $result = Cloudinary::upload($request->file(
-            'image',
-        )->getRealPath());
+        $result = Cloudinary::upload(
+            $request->file(
+                'image',
+            )->getRealPath(),
+        );
         $uploadedFileUrl = $result->getSecurePath();
         $publicId = $result->getPublicId();
         return response()->json(
@@ -106,18 +109,38 @@ Route::any(
     ],
 );
 //! social
-Route::any(
-    '/statuses',
-    [
-        StatusesApiController::class,
-        'handleReq',
-    ],
-);
+Route::delete('/status/{status}', [StatusesApiController::class, 'destroy']);
+Route::post('/status/{status}/msg', [StatusesApiController::class, 'msg']);
+Route::post('/status/{status}/like', [StatusesApiController::class, 'toggleLike']);
+Route::post('/status/{status_id}/report', [StatusesApiController::class, 'reportStatus']);
+Route::post('/status/{status_id}/hide', [StatusesApiController::class, 'hideStatus']);
 Route::any(
     '/user-statuses',
     [
         StatusesApiController::class,
         'userStatuses',
+    ],
+);
+
+Route::post(
+    '/status/{status_id}/view',
+    [
+        StatusesApiController::class,
+        'viewStatus',
+    ],
+);
+Route::post(
+    '/status/{status_id}/viewers',
+    [
+        StatusesApiController::class,
+        'statusViewers',
+    ],
+);
+Route::any(
+    '/statuses',
+    [
+        StatusesApiController::class,
+        'handleReq',
     ],
 );
 Route::post(

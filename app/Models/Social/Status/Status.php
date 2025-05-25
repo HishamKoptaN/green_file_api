@@ -27,6 +27,25 @@ class Status extends Model
             User::class,
         );
     }
+    public function views()
+    {
+        return $this->hasMany(
+            StatusView::class,
+        );
+    }
+    public function viewers()
+    {
+        return $this->hasMany(StatusView::class, 'status_id');
+    }
+    public function likes()
+    {
+        return $this->hasMany(StatusLike::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(StatusMessage::class);
+    }
 
     protected static function newFactory()
     {

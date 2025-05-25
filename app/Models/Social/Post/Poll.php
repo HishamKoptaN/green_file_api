@@ -10,7 +10,7 @@ class Poll extends Model
     protected $fillable = [
         'status',
         'question',
-        'end_date',
+        'end_at',
     ];
     public function posts()
     {
