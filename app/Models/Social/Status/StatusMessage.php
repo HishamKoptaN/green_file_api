@@ -9,6 +9,7 @@ use App\Models\User\User;
 class StatusMessage extends Model
 {
     use HasFactory;
+    protected $table = 'status_messages';
     protected $fillable = [
         'user_id',
         'status_id',

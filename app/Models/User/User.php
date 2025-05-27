@@ -7,23 +7,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\Social\Post\Post;
 use App\Models\Social\Status\Status;
-use App\Models\Social\Status\StatusComment;
-use App\Models\Social\Status\Statuslke;
-use App\Models\Course\Course;
-use App\Models\Course\CourseRating;
-use App\Models\Power\Role;
-use App\Models\Social\Post\Occasion;
 use App\Models\Cvs\Cv;
-use App\Models\Social\Friendship;
-use App\Models\Social\Status\StatusView;
+use App\Models\Social\Post\Post;
+use App\Models\Global\Report;
+use App\Models\Global\Hide;
+use App\Models\Traits\UserPostsTrait;
+use App\Models\Traits\UserStatusTrait;
+use App\Models\Traits\UserFriendshipsTrait;
+use App\Models\Traits\UserOccasionTrait;
+use App\Models\Traits\UserFollowTrait;
+use App\Models\Traits\UserCoursesTrait;
+use App\Models\Traits\UserRolesTrait;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable;
+    use UserRolesTrait, UserPostsTrait, UserStatusTrait, UserOccasionTrait, UserFollowTrait, UserCoursesTrait;
+    use UserFriendshipsTrait;
+    use HasRoles;
     protected $fillable = [
         'status',
         'firebase_uid',
@@ -37,19 +40,20 @@ class User extends Authenticatable
     protected $casts = [
         'status' => 'boolean',
     ];
-    public function likedStatuses()
-{
-    return $this->hasMany(StatusLike::class);
-}
-
-public function statusComments()
-{
-    return $this->hasMany(StatusComment::class);
-}
-
-    public function posts()
+    public function contentReports()
     {
-        return $this->morphMany(Post::class, 'postable');
+        return $this->hasMany(Report::class);
+    }
+    public function contentHides()
+    {
+        return $this->hasMany(Hide::class);
+    }
+    public function hiddenItems()
+    {
+        return $this->morphedByMany(Status::class, 'hideable', 'hides')
+            ->union(
+                $this->morphedByMany(Post::class, 'hideable', 'hides')
+            );
     }
     public function userable()
     {
@@ -58,52 +62,6 @@ public function statusComments()
     public function profile()
     {
         return $this->morphTo();
-    }
-    public function sharedPosts()
-    {
-        return $this->belongsToMany(Post::class, 'post_shares')->withTimestamps();
-    }
-    public function following()
-    {
-        return $this->belongsToMany(
-            User::class,
-            'followers',
-            'follower_id',
-            'followed_id',
-        );
-    }
-    public function interestedOccasions()
-    {
-        return $this->belongsToMany(
-            \App\Models\Social\Post\Occasion::class,
-            'occasion_user', // اسم جدول الربط
-            'user_id',
-            'occasion_id'
-        );
-    }
-
-    public function isInterestedIn(Occasion $occasion): bool
-    {
-        return $this->interestedOccasions()
-            ->where(
-                'occasion_id',
-                $occasion->id,
-            )
-            ->exists();
-    }
-    public function friendships()
-    {
-        return $this->hasMany(
-            Friendship::class,
-            'user_id',
-        )->orWhere(
-            'friend_id',
-            $this->id,
-        );
-    }
-    public function statuses()
-    {
-        return $this->hasMany(Status::class);
     }
     public function opportunityLookings()
     {
@@ -114,150 +72,19 @@ public function statusComments()
     {
         return $this->hasMany(Company::class);
     }
-    public function followers()
-    {
-        return $this->belongsToMany(
-            User::class,
-            'followers',
-            'followed_id',
-            'follower_id',
-        );
-    }
-    public function statusViews()
-    {
-        return $this->hasMany(StatusView::class);
-    }
-    public function follow($id)
-    {
-        return $this->followings()->attach($id);
-    }
 
-    public function unfollow($id)
-    {
-        return $this->followings()->detach($id);
-    }
-
-    public function isFollowing($id)
-    {
-        return $this->followings()->where('followed_id', $id)->exists();
-    }
-    public function followings()
-    {
-        return $this->belongsToMany(
-            User::class,
-            'followers',
-            'follower_id',
-            'followed_id',
-        )->select('users.id');
-    }
-    public function isFollowedBy($user)
-    {
-        return $this->followers()
-            ->where('user_id', $user->id)
-            ->exists();
-    }
-    // ! Frindships
-    public function sentFriendRequests()
-    {
-        return $this->hasMany(Friendship::class, 'user_id')->where('status', 'pending');
-    }
-
-    public function receivedFriendRequests()
-    {
-        return $this->hasMany(Friendship::class, 'friend_id')->where('status', 'pending');
-    }
-
-    public function friends()
-    {
-        return $this->hasMany(Friendship::class, 'user_id')->where('status', 'accepted')
-            ->orWhere(function ($q) {
-                $q->where('friend_id', $this->id)->where('status', 'accepted');
-            });
-    }
-    public function sendFriendRequest(User $user)
-    {
-        return $this->sentFriendRequests()->create(
-            [
-                'friend_id' => $user->id,
-                'status' => 'pending',
-            ],
-        );
-    }
-    public function acceptFriendRequest(User $user)
-    {
-        return $this->receivedFriendRequests()
-            ->where('user_id', $user->id)
-            ->update(['status' => 'accepted']);
-    }
-
-    public function rejectFriendRequest(User $user)
-    {
-        return $this->receivedFriendRequests()
-            ->where('user_id', $user->id)
-            ->update(['status' => 'rejected']);
-    }
-    public function isFriendWith(User $user)
-    {
-        return $this->friends()
-            ->where(function ($query) use ($user) {
-                $query->where('friend_id', $user->id)
-                    ->orWhere('user_id', $user->id);
-            })->exists();
-    }
-    // ! courses
-
-    public function courses()
-    {
-        return $this->belongsToMany(Course::class);
-    }
-    public function courseRating()
-    {
-        return $this->hasMany(CourseRating::class);
-    }
-    // ! userRoles
-    public function userRoles(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Role::class,
-            'role_users',
-            'user_id',
-            'role_id',
-        );
-    }
-    public function role()
-    {
-        return $this->belongsTo(
-            Role::class,
-        );
-    }
     public function getCreatedDateAttribute()
     {
         return $this->created_at ? $this->created_at->format('Y-m-d') : null;
     }
-
     public function getUpgradedDateAttribute()
     {
         return $this->upgraded_at ? $this->upgraded_at->format('Y-m-d H:i') : null;
     }
-
     public function upgradedDate(): Attribute
     {
         return Attribute::make(
             get: fn(mixed $value) => $this->upgraded_at ? $this->upgraded_at->format('Y-m-d H:i') : null,
-        );
-    }
-    public function refer()
-    {
-        return $this->belongsTo(
-            User::class,
-            'refered_by',
-        );
-    }
-    public function referrals()
-    {
-        return $this->hasMany(
-            User::class,
-            'refered_by',
         );
     }
     public function cv()

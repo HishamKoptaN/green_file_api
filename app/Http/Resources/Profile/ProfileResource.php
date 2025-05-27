@@ -15,8 +15,8 @@ class ProfileResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => $this->getUserDetails(),
-            'followers_count' => $this->followers()->count(),
-            'friends_count' => $this->friends()->count(),
+            'followers_count' => $this->resource->followers()->count(),
+            'friends_count' => $this->resource->friends()->count(),
         ];
     }
     public function getUserDetails()

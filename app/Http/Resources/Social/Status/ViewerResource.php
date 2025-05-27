@@ -14,38 +14,30 @@ class ViewerResource extends JsonResource
         parent::__construct($resource);
         $this->status = $status;
     }
-
     public function toArray($request)
     {
-        $isLiked = false;
-        if ($this->status) {
-            $isLiked = $this->status->likes()
-                ->where('user_id', $this->user_id ?? $this->id)
-                ->exists();
-        }
-
+        $isLiked = $this->status
+            ? $this->status->likes()->where('user_id', $this->id)->exists()
+            : false;
         return [
             'id' => $this->id,
-            'user' => $this->getCommentOwnerDetails(),
-            'message' => $this->message,
+            'user' => $this->getMessageOwnerDetails() ?? null,
+            'message' => $this->pivot->message ?? null,
             'is_liked' => $isLiked,
         ];
     }
-
-    private function getCommentOwnerDetails()
+    private function getMessageOwnerDetails()
     {
-        $owner = optional($this->user)->userable;
-
-        if (!$owner) {
-            return null;
-        }
+        $owner = optional($this->userable);
 
         return [
-            'type' => $owner->getMorphClass(),
-            'name' => $owner instanceof Company
-                ? $owner->name
-                : $owner->first_name . ' ' . $owner->last_name,
-            'image' => $owner->image,
+            'type' => $owner ? $owner->getMorphClass() : null,
+            'name' => $owner
+                ? ($owner instanceof Company
+                    ? $owner->name
+                    : trim(($owner->first_name ?? '') . ' ' . ($owner->last_name ?? '')))
+                : null,
+            'image' => $owner->image ?? null,
         ];
     }
 }

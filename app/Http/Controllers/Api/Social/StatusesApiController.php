@@ -12,7 +12,6 @@ use App\Models\Social\Status\Status;
 use App\Models\Social\Status\StatusLike;
 use App\Models\Social\Status\StatusReport;
 use App\Models\Social\Status\HiddenStatus;
-use App\Models\Social\Status\StatusMessage;
 use App\Helpers\uploadImageHelper;
 use App\Models\User\User;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -78,7 +77,6 @@ class StatusesApiController extends Controller
                 $page,
                 ['path' => request()->url(), 'query' => request()->query()]
             );
-
             return successRes(
                 paginateRes(
                     $paginated,
@@ -128,13 +126,17 @@ class StatusesApiController extends Controller
                     fieldName: 'image',
 
                 ) : null;
-            $videoPath = $request->hasFile('video')
-                ?  uploadImageHelper::uploadFile(
+            $videoData = $request->hasFile('video')
+                ? uploadImageHelper::uploadFile(
                     request: $request,
                     user: $user,
                     folder: 'statuses',
                     fieldName: 'video',
                 ) : null;
+
+            $videoPath = $videoData['file_url'] ?? null;
+            $thumbnailUrl = $videoData['thumbnail_url'] ?? null;
+
             $audioPath = $request->hasFile('audio')
                 ?  uploadImageHelper::uploadFile(
                     request: $request,
@@ -149,6 +151,7 @@ class StatusesApiController extends Controller
                     'image' => $imagePath,
                     'video' => $videoPath,
                     'audio' => $audioPath,
+                    'thumbnail_url' => $thumbnailUrl,
                     'font_family' => $request->filled('font_family') ? $request->font_family : null,
                     'font_size' => $request->filled('font_size') ? $request->font_size : null,
                     'font_color' => $request->filled('font_color') ? $request->font_color : null,
@@ -165,93 +168,61 @@ class StatusesApiController extends Controller
         }
     }
 
-    public function viewStatus(
-        $status_id,
-    ) {
-        $user = Auth::guard(
-            'sanctum',
-        )->user();
-        if (!$user) {
-            return response()->json(
-                [
-                    'message' => 'Unauthorized',
-                ],
-                401,
-            );
-        }
-        $status = Status::find(
-            $status_id,
-        );
-        if (!$status) {
-            return response()->json(
-                [
-                    'message' => 'Status not found',
-                ],
-                404,
-            );
-        }
-        $alreadyViewed = StatusView::where(
-            'status_id',
-            $status_id,
-        )
-            ->where(
-                'user_id',
-                $user->id,
-            )
-            ->first();
-        if (!$alreadyViewed) {
-            StatusView::create(
-                [
-                    'status_id' => $status_id,
-                    'user_id' => $user->id,
-                    'viewed_at' => now(),
-                ],
-            );
-        }
-        return successRes(
-            null,
-            201,
-        );
-    }
-    public function statusViewers($statusId)
+    public function view(Status $status)
     {
-        try {
-            $status = Status::findOrFail($statusId);
-            $viewers = $status->viewers()->with('user')->get();
+        $user = Auth::guard('sanctum')->user();
 
-            // نستخدم map لتمرير الـ status لكل Resource
-            $viewerResources = $viewers->map(function ($viewer) use ($status) {
-                return new ViewerResource($viewer, $status);
-            });
-
-            return successRes($viewerResources);
-        } catch (\Exception $e) {
-            return failureRes($e->getMessage());
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
         }
+        $alreadyViewed = StatusView::where('status_id', $status->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$alreadyViewed) {
+            StatusView::create([
+                'status_id' => $status->id,
+                'user_id' => $user->id,
+                'viewed_at' => now(),
+            ]);
+        }
+
+        return successRes(null, 201);
     }
 
-    public function hideStatus($statusId)
+    public function viewers(Status $status)
+    {
+        $viewers = $status->viewers()->with('userable')->get();
+        $viewerResources = $viewers->map(function ($viewer) use ($status) {
+            return new ViewerResource($viewer, $status);
+        });
+
+        return successRes($viewerResources);
+    }
+
+    public function hide(Status $status)
     {
         try {
             $user = auth()->user();
-
             HiddenStatus::firstOrCreate([
                 'user_id' => $user->id,
-                'status_id' => $statusId,
+                'status_id' => $status->id,
             ]);
             return successRes();
         } catch (\Exception $e) {
             return failureRes($e->getMessage());
         }
     }
-    public function reportStatus(Request $request, $statusId)
+    public function report(Request $request, Status $status)
     {
         try {
             $user = auth()->user();
             $reason = $request->getContent();
             StatusReport::create([
                 'user_id' => $user->id,
-                'status_id' => $statusId,
+                'status_id' => $status->id,
                 'reason' => $reason,
             ]);
             return successRes();
@@ -259,12 +230,12 @@ class StatusesApiController extends Controller
             return failureRes($e->getMessage());
         }
     }
-    public function toggleLike($status)
+    public function toggleLike(Status $status)
     {
         $user = Auth::guard('sanctum')->user();
 
         $like = StatusLike::where('user_id', $user->id)
-            ->where('status_id', $status)
+            ->where('status_id', $status->id)
             ->first();
 
         if ($like) {
@@ -274,27 +245,20 @@ class StatusesApiController extends Controller
 
         StatusLike::create([
             'user_id' => $user->id,
-            'status_id' => $status,
+            'status_id' => $status->id,
         ]);
 
         return successRes();
     }
-
     public function msg(Request $request, Status $status)
     {
         $user = Auth::guard('sanctum')->user();
-
-        // تأكد من صحة الرسالة
-        $validated = $request->validate([
-            'message' => 'required|string',
-        ]);
-
+        $message = $request->getContent();
         // إنشاء الرسالة
-        $status->comments()->create([
+        $status->statusMessages()->create([
             'user_id' => $user->id,
-            'message' => $validated['message'],
+            'message' => $message,
         ]);
-
         return successRes();
     }
 

@@ -11,7 +11,6 @@ class StatusResource extends JsonResource
     public function toArray($request)
     {
         $user = Auth::guard('sanctum')->user();
-
         $hasSeen = false;
         $isLiked = false;
         if ($user) {
@@ -27,6 +26,7 @@ class StatusResource extends JsonResource
             'font_color' => $this->font_color,
             'font_family' => $this->font_family,
             'video' => $this->video,
+            'thumbnail_url' => $this->thumbnail_url,
             'audio' => $this->audio,
             'created_at' => $this->created_at->diffForHumans(),
             'updated_at' => $this->updated_at->diffForHumans(),

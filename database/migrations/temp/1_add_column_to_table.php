@@ -8,8 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('msgs', function (Blueprint $table) {
-            $table->timestamp('read_at')->nullable()->after('video');
+        Schema::table('social_posts', function (Blueprint $table) {
+            $table->String('thumbnail_url')->nullable()->after('video');
         });
     }
 };

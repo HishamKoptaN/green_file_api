@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Profile\ProfileApiController;
+use App\Http\Controllers\Api\Global\ReportApiController;
+use App\Http\Controllers\Api\Global\HideApiController;
 //! social
 use App\Http\Controllers\Api\Social\LikeApiController;
 use App\Http\Controllers\Api\Social\StatusesApiController;
@@ -29,27 +31,12 @@ use App\Http\Controllers\Api\Chats\ChatsApiController;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
-Route::post(
-    '/image',
-    function (
-        Request $request,
-    ) {
-        $result = Cloudinary::upload(
-            $request->file(
-                'image',
-            )->getRealPath(),
-        );
-        $uploadedFileUrl = $result->getSecurePath();
-        $publicId = $result->getPublicId();
-        return response()->json(
-            [
-                'message' => 'Image uploaded successfully',
-                'url' => $uploadedFileUrl,
-                'public_id' => $publicId,
-            ],
-        );
-    },
-);
+Route::prefix('reports')->group(function () {
+    Route::post('/', [ReportApiController::class, 'store']);
+});
+Route::prefix('hides')->group(function () {
+    Route::post('/', [HideApiController::class, 'store']);
+});
 //! chats
 Route::get(
     '/chats',
@@ -108,34 +95,8 @@ Route::any(
         'handleReq',
     ],
 );
-//! social
-Route::delete('/status/{status}', [StatusesApiController::class, 'destroy']);
-Route::post('/status/{status}/msg', [StatusesApiController::class, 'msg']);
-Route::post('/status/{status}/like', [StatusesApiController::class, 'toggleLike']);
-Route::post('/status/{status_id}/report', [StatusesApiController::class, 'reportStatus']);
-Route::post('/status/{status_id}/hide', [StatusesApiController::class, 'hideStatus']);
-Route::any(
-    '/user-statuses',
-    [
-        StatusesApiController::class,
-        'userStatuses',
-    ],
-);
-
-Route::post(
-    '/status/{status_id}/view',
-    [
-        StatusesApiController::class,
-        'viewStatus',
-    ],
-);
-Route::post(
-    '/status/{status_id}/viewers',
-    [
-        StatusesApiController::class,
-        'statusViewers',
-    ],
-);
+//! social !//
+//! statuses
 Route::any(
     '/statuses',
     [
@@ -143,6 +104,16 @@ Route::any(
         'handleReq',
     ],
 );
+Route::get('/status/{status}/viewers', [StatusesApiController::class, 'viewers']);
+Route::delete('/status/{status}', [StatusesApiController::class, 'destroy']);
+Route::post('/status/{status}/msg', [StatusesApiController::class, 'msg']);
+Route::post('/status/{status}/like', [StatusesApiController::class, 'toggleLike']);
+Route::post('/status/{status}/report', [StatusesApiController::class, 'report']);
+Route::post('/status/{status}/hide', [StatusesApiController::class, 'hide']);
+Route::any( '/user-statuses', [StatusesApiController::class,'userStatuses',]);
+Route::post('/status/{status}/view',[StatusesApiController::class, 'view']);
+//! posts
+
 Route::post(
     '/posts/draft',
     [

@@ -164,6 +164,7 @@ class CustomPostResource extends JsonResource
             'content' => $this->content,
             'image' => $this->image,
             'video' => $this->video,
+            'thumbnail_url' => $this->thumbnail_url,
             'pdf' => $this->pdf,
             'end_at' => $this->end_at,
         ];

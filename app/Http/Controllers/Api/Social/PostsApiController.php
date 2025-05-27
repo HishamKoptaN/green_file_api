@@ -93,13 +93,17 @@ class PostsApiController extends Controller
                 'type',
                 'socialPost',
             );
-            // رفع الصور والملفات إن وجدت
-            $imagePath = $this->handleUpload($request, $user, 'posts', 'image', $request->image_url);
-            $pdfPath = $this->handleUpload($request, $user, 'pdfs', 'pdf', $request->pdf_url);
-            $videoPath = $this->handleUpload($request, $user, 'videos', 'video', $request->video_url);
-            // تحديد وقت النشر
+            //! رفع الصور والملفات إن وجدت
+            $imageUpload = $this->handleUpload($request, $user, 'posts', 'image', $request->image_url);
+            $pdfUpload = $this->handleUpload($request, $user, 'pdfs', 'pdf', $request->pdf_url);
+            $videoUpload = $this->handleUpload($request, $user, 'videos', 'video', $request->video_url);
+            $imagePath = $imageUpload['file_url'] ?? null;
+            $pdfPath = $pdfUpload['file_url'] ?? null;
+            $videoPath = $videoUpload['file_url'] ?? null;
+            $thumbnail_url = $videoUpload['thumbnail_url'] ?? null;
+            //! تحديد وقت النشر
             $publishAt = $request->filled('publish_at') ? $request->input('publish_at') : now();
-            // إنشاء المنشور داخل transaction
+            //! إنشاء المنشور داخل transaction
             if ($request->filled('publish_at') && Carbon::parse($request->publish_at)->isPast()) {
                 return failureRes("لا يمكن تحديد وقت نشر في الماضي");
             }
@@ -112,6 +116,7 @@ class PostsApiController extends Controller
                     $imagePath,
                     $pdfPath,
                     $videoPath,
+                    $thumbnail_url,
                 ) {
                     $post = Post::create(
                         [
@@ -127,6 +132,7 @@ class PostsApiController extends Controller
                             $imagePath,
                             $pdfPath,
                             $videoPath,
+                            $thumbnail_url,
                         ),
                         'sharedPost' => $this->createSharedPost(
                             $request,
@@ -142,12 +148,14 @@ class PostsApiController extends Controller
                             $imagePath,
                             $pdfPath,
                             $videoPath,
+                            $thumbnail_url,
                         ),
                         'scheduling'  => $this->createSocialPost(
                             $request,
                             $imagePath,
                             $pdfPath,
                             $videoPath,
+                            $thumbnail_url,
                         ),
                         'servReq'  => $this->createSerReq(
                             $request,
@@ -191,6 +199,7 @@ class PostsApiController extends Controller
         $image,
         $pdf,
         $video,
+        $thumbnail_url,
     ) {
         return SocialPost::create(
             [
@@ -199,6 +208,7 @@ class PostsApiController extends Controller
                 ),
                 'image' => $image,
                 'video' => $video,
+                'thumbnail_url' => $thumbnail_url,
                 'pdf' => $pdf,
             ],
         );
@@ -269,16 +279,20 @@ class PostsApiController extends Controller
             if (!$user) {
                 return failureRes("المستخدم غير مسجل الدخول");
             }
-            $imagePath = $request->hasFile('image')
+            $imageUpload= $request->hasFile('image')
                 ? $this->handleUpload($request, $user, 'posts', 'image', $request->file('image'))
                 : $request->input('image_url');
-            $pdfPath = $request->hasFile('pdf')
+            $pdfUpload = $request->hasFile('pdf')
                 ? $this->handleUpload($request, $user, 'pdfs', 'pdf', $request->file('pdf'))
                 : $request->input('pdf_url');
-            $videoPath = $request->hasFile('video')
+            $videoUpload = $request->hasFile('video')
                 ? $this->handleUpload($request, $user, 'videos', 'video', $request->file('video'))
                 : $request->input('video_url');
-            $draft = \App\Models\Social\Post\Draft::updateOrCreate(
+            $imagePath = $imageUpload['file_url'] ?? null;
+            $pdfPath = $pdfUpload['file_url'] ?? null;
+            $videoPath = $videoUpload['file_url'] ?? null;
+            $thumbnail_url = $videoUpload['thumbnail_url'] ?? null;
+            $draft = Draft::updateOrCreate(
                 [
                     'user_id' => $user->id,
                 ],
@@ -288,11 +302,12 @@ class PostsApiController extends Controller
                     ),
                     'image' => $imagePath,
                     'video' => $videoPath,
+                    'thumbnail_url' => $thumbnail_url,
                     'pdf' => $pdfPath,
                 ]
             );
             return successRes(
-                new \App\Http\Resources\Social\Post\DraftResource(
+                new DraftResource(
                     $draft,
                 ),
                 200,

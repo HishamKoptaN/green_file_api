@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
                 'servReq' => \App\Models\Social\Post\ServiceRequest::class,
                 'news' => \App\Models\BusinessFile\News::class,
                 'companyPost' => \App\Models\Social\Post\CompanyPost::class,
+                'post' => \App\Models\Social\Post\Post::class,
+                'status' => \App\Models\Social\Status\Status::class,
             ],
         );
     }

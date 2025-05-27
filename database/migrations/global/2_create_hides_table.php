@@ -9,20 +9,21 @@ return new class extends Migration
     public function up()
     {
         Schema::create(
-            'status_messages',
-            function (Blueprint $table) {
+            'hides',
+            function (
+                Blueprint $table,
+            ) {
                 $table->id();
-                $table->foreignId('status_id')->constrained('statuses')->onDelete('cascade');
                 $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-                $table->text('message');
-                $table->timestamps();
+                $table->morphs('hideable');
+                    $table->timestamps();
             },
         );
     }
     public function down()
     {
         Schema::dropIfExists(
-            'status_messages',
+            'hides',
         );
     }
 };

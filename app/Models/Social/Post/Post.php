@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\social\post\PostFactory;
 use App\Models\User\User;
+use App\Models\Global\Report;
+use App\Models\Global\Hide;
 use Carbon\Carbon;
 
 class Post extends Model
@@ -22,6 +24,16 @@ class Post extends Model
         'postable',
     ];
     protected $dates = ['publish_at'];
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function hides()
+    {
+        return $this->morphMany(Hide::class, 'hideable');
+    }
 
     // أو يمكنك استخدام accessor إذا كنت ترغب في إجراء بعض المعالجة الإضافية:
     public function getPublishAtAttribute($value)

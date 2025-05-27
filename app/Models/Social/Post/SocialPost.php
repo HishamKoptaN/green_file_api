@@ -13,6 +13,7 @@ class SocialPost extends Model
         'content',
         'image',
         'video',
+        'thumbnail_url',
         'pdf',
     ];
     public function posts()
